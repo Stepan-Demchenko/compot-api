@@ -12,7 +12,7 @@ import { FoodsModule } from './foods/foods.module';
       port: 5432,
       username: 'postgres',
       password: 'root',
-      database: 'postgres',
+      database: 'compot',
       autoLoadEntities: true,
       synchronize: true,
     }),

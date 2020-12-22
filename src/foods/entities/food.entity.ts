@@ -1,5 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { Ingredient } from './ingridient.entity';
+import { Category } from './category.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
@@ -18,9 +20,11 @@ export class Food extends BaseEntity {
   @Column()
   description: string;
 
-  @Column('json', { nullable: true })
-  type: any[];
+  @ManyToMany(() => Category)
+  @JoinTable()
+  category: number[];
 
-  @Column('json', { nullable: true })
-  ingredients: any[];
+  @ManyToMany(() => Ingredient)
+  @JoinTable()
+  ingredients: number[];
 }
