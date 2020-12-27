@@ -16,15 +16,9 @@ export class UpdateFoodDto {
   @IsString()
   readonly description: string;
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 },
-    { each: true },
-  )
-  readonly category: number[];
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
+  readonly categoryIds: number[];
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 },
-    { each: true },
-  )
-  readonly ingredients: number[];
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
+  readonly ingredientIds: number[];
 }

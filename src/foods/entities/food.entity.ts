@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Ingredient } from './ingridient.entity';
 import { Category } from './category.entity';
@@ -8,10 +8,10 @@ export class Food extends BaseEntity {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'real' })
   price: number;
 
-  @Column()
+  @Column({ type: 'real' })
   weight: number;
 
   @Column()
@@ -20,11 +20,20 @@ export class Food extends BaseEntity {
   @Column()
   description: string;
 
-  @ManyToMany(() => Category)
+  @ManyToMany((type) => Category, (category: Category) => category.foods)
   @JoinTable()
-  category: number[];
+  categories: Category[];
 
-  @ManyToMany(() => Ingredient)
+  @RelationId((food: Food) => food.categories)
+  categoryIds: number[];
+
+  @ManyToMany(
+    (type) => Ingredient,
+    (ingredient: Ingredient) => ingredient.foods,
+  )
   @JoinTable()
-  ingredients: number[];
+  ingredients: Ingredient[];
+
+  @RelationId((food: Food) => food.ingredients)
+  ingredientIds: number[];
 }

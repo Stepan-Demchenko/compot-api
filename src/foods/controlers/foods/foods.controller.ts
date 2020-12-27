@@ -8,7 +8,7 @@ export class FoodsController {
   constructor(private readonly foodService: FoodsService) {}
 
   @Get()
-  getAll(): Promise<Food[]> {
+  getAll() {
     return this.foodService.findAll();
   }
 

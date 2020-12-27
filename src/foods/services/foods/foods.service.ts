@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Food } from '../../entities/food.entity';
 import { Repository } from 'typeorm';
+
+import { Food } from '../../entities/food.entity';
 import { CreateFoodDto } from '../../dto/create-food.dto';
 import { UpdateFoodDto } from '../../dto/update-food.dto';
 
@@ -11,8 +12,10 @@ export class FoodsService {
     @InjectRepository(Food) private readonly foodRepository: Repository<Food>,
   ) {}
 
-  findAll() {
-    return this.foodRepository.find();
+  findAll(): Promise<Food[]> {
+    return this.foodRepository.find({
+      relations: ['categories', 'ingredients'],
+    });
   }
 
   async findOne(id: string) {

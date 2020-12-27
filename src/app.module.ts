@@ -6,6 +6,7 @@ import { FoodsModule } from './foods/foods.module';
 
 @Module({
   imports: [
+    FoodsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -16,7 +17,6 @@ import { FoodsModule } from './foods/foods.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    FoodsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

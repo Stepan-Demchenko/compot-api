@@ -4,10 +4,10 @@ export class CreateFoodDto {
   @IsString()
   readonly title: string;
 
-  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @IsNumber({ allowInfinity: true, maxDecimalPlaces: 2 })
   readonly price: number;
 
-  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @IsNumber({ allowInfinity: true, maxDecimalPlaces: 2 })
   readonly weight: number;
 
   @IsString()
@@ -16,15 +16,9 @@ export class CreateFoodDto {
   @IsString()
   readonly description: string;
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 },
-    { each: true },
-  )
-  readonly category: number[];
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
+  readonly categoryIds: number[];
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 },
-    { each: true },
-  )
-  readonly ingredients: number[];
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
+  readonly ingredientIds: number[];
 }
