@@ -17,8 +17,8 @@ export class CreateFoodDto {
   readonly description: string;
 
   @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
-  readonly categoryIds: number[];
+  ingredients: any[];
 
   @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
-  readonly ingredientIds: number[];
+  categories: any[];
 }

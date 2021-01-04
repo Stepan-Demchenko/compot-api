@@ -1,19 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+
 import { FoodsService } from '../../services/foods/foods.service';
-import { Food } from '../../entities/food.entity';
-import { CreateFoodDto } from '../../dto/create-food.dto';
+import { CreateFoodDto } from '../../../dto/create-food.dto';
+import { PaginationQueryDto } from '../../../dto/pagination-query.dto';
 
 @Controller('foods')
 export class FoodsController {
   constructor(private readonly foodService: FoodsService) {}
 
   @Get()
-  getAll() {
-    return this.foodService.findAll();
+  getAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.foodService.findAll(paginationQuery);
   }
 
   @Post()
-  create(@Body() createFoodDto: CreateFoodDto): Promise<Food> {
+  create(@Body() createFoodDto: CreateFoodDto): Promise<any> {
     return this.foodService.create(createFoodDto);
   }
 }

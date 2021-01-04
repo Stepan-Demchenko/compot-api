@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Food } from '../../entities/food.entity';
-import { CreateFoodDto } from '../../dto/create-food.dto';
-import { UpdateFoodDto } from '../../dto/update-food.dto';
+import { CreateFoodDto } from '../../../dto/create-food.dto';
+import { UpdateFoodDto } from '../../../dto/update-food.dto';
+import { PaginationQueryDto } from '../../../dto/pagination-query.dto';
 
 @Injectable()
 export class FoodsService {
@@ -12,9 +13,11 @@ export class FoodsService {
     @InjectRepository(Food) private readonly foodRepository: Repository<Food>,
   ) {}
 
-  findAll(): Promise<Food[]> {
+  findAll(paginationQuery: PaginationQueryDto): Promise<Food[]> {
     return this.foodRepository.find({
       relations: ['categories', 'ingredients'],
+      skip: paginationQuery.offset,
+      take: paginationQuery.limit,
     });
   }
 
@@ -27,7 +30,13 @@ export class FoodsService {
   }
 
   async create(createFoodDto: CreateFoodDto) {
-    const food = this.foodRepository.create(createFoodDto);
+    const newFood = { ...createFoodDto };
+    newFood.ingredients = (createFoodDto.ingredients as number[]).map(
+      (id: number) => {
+        return { id: id };
+      },
+    );
+    const food = this.foodRepository.create(newFood);
     return this.foodRepository.save(food);
   }
 
