@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FoodsModule } from './foods/foods.module';
+import { UsersModule } from './users/users.module';
+import { CategoriesModule } from './categories/categories.module';
+import { IngredientsModule } from './ingredients/ingredients.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -22,6 +25,9 @@ import appConfig from './config/app.config';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    UsersModule,
+    CategoriesModule,
+    IngredientsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -15,7 +15,7 @@ export class Food extends BaseEntity {
   weight: number;
 
   @Column()
-  img: string;
+  imgSrc: string;
 
   @Column()
   description: string;

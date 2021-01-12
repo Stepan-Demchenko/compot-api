@@ -11,9 +11,6 @@ export class CreateFoodDto {
   readonly weight: number;
 
   @IsString()
-  readonly img: string;
-
-  @IsString()
   readonly description: string;
 
   @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })

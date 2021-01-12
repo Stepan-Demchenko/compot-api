@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 
 import { Food } from '../../entities/food.entity';
-import { CreateFoodDto } from '../../../dto/create-food.dto';
-import { UpdateFoodDto } from '../../../dto/update-food.dto';
-import { PaginationQueryDto } from '../../../dto/pagination-query.dto';
+import { CreateFoodDto } from '../../dto/create-food.dto';
+import { UpdateFoodDto } from '../../dto/update-food.dto';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { Event } from '../../entities/event.entity';
 import arrayOfNumbersToArrayOfObjects from '../../../common/utils/arrayOfNumbersToArrayOfObjects';
 
@@ -24,7 +24,7 @@ export class FoodsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const food = await this.foodRepository.findOne(id);
     if (!food) {
       throw new NotFoundException(`Food with id=${id} not found`);
@@ -66,9 +66,9 @@ export class FoodsService {
     }
   }
 
-  async update(id: string, updateFoodDto: UpdateFoodDto) {
+  async update(id: number, updateFoodDto: UpdateFoodDto): Promise<Food> {
     const food = await this.foodRepository.preload({
-      id: +id,
+      id: id,
       ...updateFoodDto,
     });
     if (!food) {
@@ -77,7 +77,7 @@ export class FoodsService {
     return this.foodRepository.save(food);
   }
 
-  async remove(id: string) {
+  async remove(id: number): Promise<Food> {
     const food = await this.foodRepository.findOne(id);
     return this.foodRepository.remove(food);
   }
