@@ -1,21 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 
 import { Food } from '../../entities/food.entity';
 import { CreateFoodDto } from '../../../dto/create-food.dto';
 import { UpdateFoodDto } from '../../../dto/update-food.dto';
 import { PaginationQueryDto } from '../../../dto/pagination-query.dto';
+import { Event } from '../../entities/event.entity';
+import arrayOfNumbersToArrayOfObjects from '../../../common/utils/arrayOfNumbersToArrayOfObjects';
 
 @Injectable()
 export class FoodsService {
   constructor(
     @InjectRepository(Food) private readonly foodRepository: Repository<Food>,
+    private readonly connection: Connection,
   ) {}
 
   findAll(paginationQuery: PaginationQueryDto): Promise<Food[]> {
     return this.foodRepository.find({
-      relations: ['categories', 'ingredients'],
+      relations: ['categories'],
       skip: paginationQuery.offset,
       take: paginationQuery.limit,
     });
@@ -30,14 +33,37 @@ export class FoodsService {
   }
 
   async create(createFoodDto: CreateFoodDto) {
-    const newFood = { ...createFoodDto };
-    newFood.ingredients = (createFoodDto.ingredients as number[]).map(
-      (id: number) => {
-        return { id: id };
-      },
+    const newFood: CreateFoodDto = { ...createFoodDto };
+    newFood.ingredients = arrayOfNumbersToArrayOfObjects(
+      createFoodDto.ingredients as number[],
     );
     const food = this.foodRepository.create(newFood);
     return this.foodRepository.save(food);
+  }
+
+  async recommendFood(food: Food) {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      food.recommendations++;
+
+      const recommendEvent = new Event();
+      recommendEvent.name = 'recommend_food';
+      recommendEvent.type = 'food';
+      recommendEvent.payload = { foodId: food.id };
+
+      await queryRunner.manager.save(food);
+      await queryRunner.manager.save(recommendEvent);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async update(id: string, updateFoodDto: UpdateFoodDto) {

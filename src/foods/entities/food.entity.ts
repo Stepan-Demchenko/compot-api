@@ -20,6 +20,9 @@ export class Food extends BaseEntity {
   @Column()
   description: string;
 
+  @Column({ default: 0 })
+  recommendations: number;
+
   @ManyToMany((type) => Category, (category: Category) => category.foods)
   @JoinTable()
   categories: Category[];

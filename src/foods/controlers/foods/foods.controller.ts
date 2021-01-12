@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
-import { FoodsService } from '../../services/foods/foods.service';
 import { CreateFoodDto } from '../../../dto/create-food.dto';
+import { FoodsService } from '../../services/foods/foods.service';
 import { PaginationQueryDto } from '../../../dto/pagination-query.dto';
 
 @Controller('foods')
