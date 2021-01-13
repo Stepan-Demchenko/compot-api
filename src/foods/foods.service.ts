@@ -18,7 +18,7 @@ export class FoodsService {
 
   findAll(paginationQuery: PaginationQueryDto): Promise<Food[]> {
     return this.foodRepository.find({
-      relations: ['categories'],
+      relations: ['category'],
       skip: paginationQuery.offset,
       take: paginationQuery.limit,
     });

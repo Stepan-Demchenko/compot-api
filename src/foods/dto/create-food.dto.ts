@@ -1,4 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
+import { Category } from '../../categories/entities/category.entity';
 
 export class CreateFoodDto {
   @IsString()
@@ -16,6 +17,6 @@ export class CreateFoodDto {
   @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
   ingredients: any[];
 
-  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
-  categories: any[];
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  category: Category;
 }

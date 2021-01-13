@@ -5,9 +5,9 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { QueryFailedError } from 'typeorm';
+import { ErrorResponseInterface } from '../interfaces/error-response.interface';
 
-@Catch(HttpException, QueryFailedError)
+@Catch(HttpException)
 export class HttpExceptionFilter<T extends HttpException>
   implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
@@ -16,14 +16,17 @@ export class HttpExceptionFilter<T extends HttpException>
 
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
+    const request = ctx.getRequest<Request>();
 
-    const error =
+    const errorResponse: ErrorResponseInterface | object =
       typeof response === 'string'
-        ? { message: exceptionResponse }
+        ? {
+            message: exceptionResponse,
+            path: request,
+            timestamp: new Date().toISOString(),
+          }
         : (exceptionResponse as object);
 
-    response
-      .status(status)
-      .json({ ...error, timestamp: new Date().toISOString() });
+    response.status(status).json(errorResponse);
   }
 }

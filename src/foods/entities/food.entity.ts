@@ -1,7 +1,14 @@
-import { Column, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  RelationId,
+} from 'typeorm';
 import { BaseEntity } from '../../common/base.entity';
-import { Ingredient } from '../../ingredients/entities/ingredient.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { Ingredient } from '../../ingredients/entities/ingredient.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
@@ -23,12 +30,11 @@ export class Food extends BaseEntity {
   @Column({ default: 0 })
   recommendations: number;
 
-  @ManyToMany((type) => Category, (category: Category) => category.foods)
-  @JoinTable()
-  categories: Category[];
+  @ManyToOne(() => Category, (category: Category) => category.foods)
+  category: Category;
 
-  @RelationId((food: Food) => food.categories)
-  categoryIds: number[];
+  @RelationId((food: Food) => food.category)
+  categoryId: number;
 
   @ManyToMany(
     (type) => Ingredient,
