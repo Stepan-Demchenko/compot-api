@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Ingredient } from './ingridient.entity';
-import { Category } from './category.entity';
+import { BaseEntity } from '../../common/base.entity';
+import { Ingredient } from '../../ingredients/entities/ingredient.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {

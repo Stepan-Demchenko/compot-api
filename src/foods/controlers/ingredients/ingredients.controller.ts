@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { IngredientsService } from '../../services/ingredients/ingredients.service';
 import { CreateIngredientDto } from '../../dto/create-ingredient.dto';
-import { Ingredient } from '../../entities/ingridient.entity';
+import { Ingredient } from '../../../ingredients/entities/ingridient.entity';
 
 @Controller('ingredients')
 export class IngredientsController {

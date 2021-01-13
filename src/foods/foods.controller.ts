@@ -12,11 +12,11 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { Food } from '../../entities/food.entity';
-import { CreateFoodDto } from '../../dto/create-food.dto';
-import { FoodsService } from '../../services/foods/foods.service';
-import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
-import { UpdateFoodDto } from '../../dto/update-food.dto';
+import { Food } from './entities/food.entity';
+import { CreateFoodDto } from './dto/create-food.dto';
+import { FoodsService } from './foods.service';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { UpdateFoodDto } from './dto/update-food.dto';
 
 @Controller('foods')
 export class FoodsController {
