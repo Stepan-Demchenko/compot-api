@@ -8,6 +8,7 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
+import { PaginatedResponse } from '../common/interfaces/paginated-response';
 
 @Injectable()
 export class FoodsService {
@@ -16,15 +17,19 @@ export class FoodsService {
     private readonly connection: Connection,
   ) {}
 
-  findAll(paginationQuery: PaginationQueryDto): Promise<Food[]> {
-    return this.foodRepository.find({
-      relations: ['category'],
-      skip: paginationQuery.offset,
-      take: paginationQuery.limit,
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Food>> {
+    const total = await this.foodRepository.count();
+    const items = await this.foodRepository.find({
+      skip: paginationQuery.offset || 0,
+      take: paginationQuery.limit || 10,
     });
+
+    return new PaginatedResponse<Food>(items, paginationQuery.limit, total);
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Food> {
     const food = await this.foodRepository.findOne(id);
     if (!food) {
       throw new NotFoundException(`Food with id=${id} not found`);
@@ -79,6 +84,9 @@ export class FoodsService {
 
   async remove(id: number): Promise<Food> {
     const food = await this.foodRepository.findOne(id);
+    if (!food) {
+      throw new NotFoundException(`Food with id=${id} not found`);
+    }
     return this.foodRepository.remove(food);
   }
 }

@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Ingredient } from './entities/ingredient.entity';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response';
 
 @Injectable()
 export class IngredientsService {
@@ -17,8 +19,20 @@ export class IngredientsService {
     return this.ingredientRepository.save(ingredient);
   }
 
-  findAll() {
-    return `This action returns all ingredients`;
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Ingredient>> {
+    const total = await this.ingredientRepository.count();
+    const items = await this.ingredientRepository.find({
+      skip: +paginationQuery.offset || 0,
+      take: +paginationQuery.limit || 10,
+    });
+
+    return new PaginatedResponse<Ingredient>(
+      items,
+      paginationQuery.limit,
+      total,
+    );
   }
 
   findOne(id: number) {

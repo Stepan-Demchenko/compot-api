@@ -17,13 +17,16 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { FoodsService } from './foods.service';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response';
 
 @Controller('foods')
 export class FoodsController {
   constructor(private readonly foodService: FoodsService) {}
 
   @Get()
-  getAll(@Query() paginationQuery: PaginationQueryDto): Promise<Food[]> {
+  getAll(
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Food>> {
     return this.foodService.findAll(paginationQuery);
   }
 

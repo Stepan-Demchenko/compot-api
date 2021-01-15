@@ -6,9 +6,13 @@ import {
   Put,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { Category } from './entities/category.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -20,8 +24,10 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Category>> {
+    return this.categoriesService.findAll(paginationQuery);
   }
 
   // @Get(':id')
