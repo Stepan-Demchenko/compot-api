@@ -1,24 +1,18 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Put,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import { Category } from './entities/category.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth-guard.guard';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }

@@ -8,19 +8,23 @@ import {
   Delete,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+
+import { Ingredient } from './entities/ingredient.entity';
 import { IngredientsService } from './ingredients.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
-import { PaginatedResponse } from '../common/interfaces/paginated-response';
-import { Ingredient } from './entities/ingredient.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { JwtAuthGuard } from '../common/guards/jwt-auth-guard.guard';
 
 @Controller('ingredients')
 export class IngredientsController {
   constructor(private readonly ingredientsService: IngredientsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() createIngredientDto: CreateIngredientDto) {
     return this.ingredientsService.create(createIngredientDto);
   }
@@ -38,6 +42,7 @@ export class IngredientsController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateIngredientDto: UpdateIngredientDto,
@@ -46,6 +51,7 @@ export class IngredientsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.ingredientsService.remove(id);
   }

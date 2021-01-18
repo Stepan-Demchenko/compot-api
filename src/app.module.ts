@@ -9,6 +9,7 @@ import { FoodsModule } from './foods/foods.module';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     FoodsModule,
     CategoriesModule,
     IngredientsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
