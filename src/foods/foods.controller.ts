@@ -10,6 +10,8 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { Food } from './entities/food.entity';
@@ -18,6 +20,7 @@ import { FoodsService } from './foods.service';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('foods')
 export class FoodsController {
@@ -36,8 +39,9 @@ export class FoodsController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('foodImage'))
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createFoodDto: CreateFoodDto) {
+  async create(@Body() createFoodDto: CreateFoodDto, @UploadedFile() file) {
     await this.foodService.create(createFoodDto);
   }
 
