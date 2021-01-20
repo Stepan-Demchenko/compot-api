@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { User } from './entities/user.entity';
@@ -34,6 +34,10 @@ export class UsersService {
     }
   }
 
+  findOne(user: Partial<User>) {
+    return this.userRepository.findOne(user);
+  }
+
   findAll() {
     return `This action returns all users`;
   }
@@ -46,11 +50,17 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  private async hashPassword(password: string, salt: string): Promise<string> {
-    return bcrypt.hash(password, salt);
+  async getFullUserData(email: string): Promise<User> {
+    return await getConnection()
+      .createQueryBuilder()
+      .select('user')
+      .from(User, 'user')
+      .where('user.email = :email', { email })
+      .addSelect(['user.password', 'user.salt'])
+      .getOne();
   }
 
-  findByEmail(email: string): Promise<User> {
-    return this.userRepository.findOne({ email });
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
   }
 }

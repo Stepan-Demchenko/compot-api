@@ -19,9 +19,9 @@ export class AuthController {
     return this.authService.logIn(loginDto);
   }
 
-  @Get()
-  @UseGuards(AuthGuard())
-  test() {
-    return 'ewdew';
-  }
+  // @Get()
+  // @UseGuards(AuthGuard())
+  // test() {
+  //   return 'ewdew';
+  // }
 }

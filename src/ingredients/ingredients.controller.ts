@@ -17,14 +17,18 @@ import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
-import { JwtAuthGuard } from '../common/guards/jwt-auth-guard.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../common/enums/user-role.enum';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('ingredients')
 export class IngredientsController {
   constructor(private readonly ingredientsService: IngredientsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   create(@Body() createIngredientDto: CreateIngredientDto) {
     return this.ingredientsService.create(createIngredientDto);
   }
@@ -42,7 +46,8 @@ export class IngredientsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateIngredientDto: UpdateIngredientDto,
@@ -51,7 +56,8 @@ export class IngredientsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.ingredientsService.remove(id);
   }

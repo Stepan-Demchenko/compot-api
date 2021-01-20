@@ -5,14 +5,18 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import { Category } from './entities/category.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth-guard.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../common/enums/user-role.enum';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }

@@ -9,6 +9,8 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
+import { UserRole } from '../../common/enums/user-role.enum';
+
 @Entity()
 @Unique(['email'])
 export class User {
@@ -30,14 +32,17 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   salt: string;
 
   @Column()
   email: string;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.Client })
+  role: UserRole;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createDateTime: Date;
@@ -48,10 +53,5 @@ export class User {
   @BeforeInsert()
   setFullNameColumn() {
     this.fullName = `${this.firstName} ${this.lastName}`;
-  }
-
-  async validatePassword(password: string): Promise<boolean> {
-    const hash = await bcrypt.hash(password, this.salt);
-    return hash === this.password;
   }
 }
