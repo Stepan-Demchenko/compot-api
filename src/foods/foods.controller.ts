@@ -10,7 +10,6 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 
 import { Food } from './entities/food.entity';
@@ -19,10 +18,10 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
+import { GetUser } from '../common/decorators/get-user.decorator';
+import { User } from '../users/entities/user.entity';
+import { Auth } from '../auth/decorators/auth.decorator';
 
 @Controller('foods')
 export class FoodsController {
@@ -41,16 +40,14 @@ export class FoodsController {
   }
 
   @Post()
-  @Roles(UserRole.Admin, UserRole.Moderator)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createFoodDto: CreateFoodDto) {
-    await this.foodService.create(createFoodDto);
+  async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User) {
+    await this.foodService.create(createFoodDto, user);
   }
 
   @Put(':id')
-  @Roles(UserRole.Admin, UserRole.Moderator)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -60,8 +57,7 @@ export class FoodsController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.Admin, UserRole.Moderator)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.ACCEPTED)
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.foodService.remove(id);

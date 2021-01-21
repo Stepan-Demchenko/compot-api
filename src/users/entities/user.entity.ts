@@ -1,15 +1,18 @@
 import {
-  BeforeInsert,
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 
 import { UserRole } from '../../common/enums/user-role.enum';
+import { Food } from '../../foods/entities/food.entity';
+import { Ingredient } from '../../ingredients/entities/ingredient.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity()
 @Unique(['email'])
@@ -41,7 +44,7 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.Client })
+  @Column({ type: 'enum', enum: UserRole, nullable: true })
   role: UserRole;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
@@ -50,7 +53,19 @@ export class User {
   @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   lastChangedDateTime: Date;
 
-  @BeforeInsert()
+  @OneToMany((type) => Food, (food: Food) => food.createBy)
+  foods: Food[];
+
+  @OneToMany((type) => Category, (category: Category) => category.createBy)
+  categories: Category[];
+
+  @OneToMany(
+    (type) => Ingredient,
+    (ingredient: Ingredient) => ingredient.createBy,
+  )
+  ingredients: Ingredient[];
+
+  @AfterLoad()
   setFullNameColumn() {
     this.fullName = `${this.firstName} ${this.lastName}`;
   }

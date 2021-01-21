@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Category } from './entities/category.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -15,8 +16,12 @@ export class CategoriesService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
-    const category = this.categoryRepository.create(createCategoryDto);
+  create(createCategoryDto: CreateCategoryDto, user: User) {
+    const newCategory: CreateCategoryDto = {
+      ...createCategoryDto,
+      createBy: user,
+    };
+    const category = this.categoryRepository.create(newCategory);
     return this.categoryRepository.save(category);
   }
 

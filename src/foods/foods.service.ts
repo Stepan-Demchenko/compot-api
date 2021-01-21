@@ -9,6 +9,7 @@ import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class FoodsService {
@@ -37,8 +38,8 @@ export class FoodsService {
     return food;
   }
 
-  async create(createFoodDto: CreateFoodDto) {
-    const newFood: CreateFoodDto = { ...createFoodDto };
+  async create(createFoodDto: CreateFoodDto, user: User) {
+    const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
     newFood.ingredients = arrayOfNumbersToArrayOfObjects(
       createFoodDto.ingredients as number[],
     );

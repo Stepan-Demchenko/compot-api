@@ -5,11 +5,11 @@ import { PassportModule } from '@nestjs/passport';
 
 import { JwtStrategy } from './jwt.strategy';
 import { AuthService } from './auth.service';
-import { RolesGuard } from './guards/roles.guard';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth-guard.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   controllers: [AuthController],

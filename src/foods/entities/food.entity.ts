@@ -9,6 +9,7 @@ import {
 import { BaseEntity } from '../../common/base.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Ingredient } from '../../ingredients/entities/ingredient.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
@@ -30,19 +31,23 @@ export class Food extends BaseEntity {
   @Column({ default: 0 })
   recommendations: number;
 
-  @ManyToOne(() => Category, (category: Category) => category.foods)
+  @ManyToOne(() => Category, (category: Category) => category.foods, {
+    nullable: true,
+  })
   category: Category;
 
   @RelationId((food: Food) => food.category)
   categoryId: number;
 
-  @ManyToMany(
-    (type) => Ingredient,
-    (ingredient: Ingredient) => ingredient.foods,
-  )
+  @ManyToMany(() => Ingredient, (ingredient: Ingredient) => ingredient.foods, {
+    nullable: true,
+  })
   @JoinTable()
   ingredients: Ingredient[];
 
   @RelationId((food: Food) => food.ingredients)
   ingredientIds: number[];
+
+  @ManyToOne(() => User, (user: User) => user.foods)
+  createBy: User;
 }
