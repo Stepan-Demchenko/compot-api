@@ -18,14 +18,14 @@ export class HttpExceptionFilter<T extends HttpException>
     const exceptionResponse = exception.getResponse();
     const request = ctx.getRequest<Request>();
 
-    const errorResponse: ErrorResponseInterface | object =
+    const errorResponse: ErrorResponseInterface | Record<string, any> =
       typeof response === 'string'
         ? {
             message: exceptionResponse,
             path: request,
             timestamp: new Date().toISOString(),
           }
-        : (exceptionResponse as object);
+        : (exceptionResponse as Record<string, any>);
 
     response.status(status).json(errorResponse);
   }

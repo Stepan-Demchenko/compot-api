@@ -7,16 +7,25 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { CategoryImage } from './entities/category-image.entity';
+import { MulterFileDto } from './dto/file.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(CategoryImage)
+    private readonly categoryImageRepository: Repository<CategoryImage>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
+  create(createCategoryDto: CreateCategoryDto, file: MulterFileDto) {
     const category = this.categoryRepository.create(createCategoryDto);
+    const categoryImage = this.categoryImageRepository.create({
+      originalName: file.originalname,
+      src: file.path,
+    });
+    category.images = [categoryImage];
     return this.categoryRepository.save(category);
   }
 
@@ -34,6 +43,10 @@ export class CategoriesService {
 
   findOne(id: number) {
     return `This action returns a #${id} category`;
+  }
+
+  findOneByName(name: string) {
+    return this.categoryRepository.findOne({ name });
   }
 
   update(id: number, updateCategoryDto: UpdateCategoryDto) {

@@ -12,8 +12,14 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import { Category } from './entities/category.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import {
+  getFileName,
+  MimeTypes,
+  validateFileByMimeType,
+} from '../utils/file-upload.utils';
+import { MulterFileDto } from './dto/file.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -23,18 +29,17 @@ export class CategoriesController {
   @UseInterceptors(
     FileInterceptor('categoryImage', {
       storage: diskStorage({
-        destination: function (req, file, cb) {},
-        filename: function (req, file, cb) {
-          cb(null, file.fieldname + '-' + Date.now());
-        },
+        destination: './upload/category-images',
+        filename: getFileName,
       }),
+      fileFilter: validateFileByMimeType([MimeTypes.PNG, MimeTypes.JPEG]),
     }),
   )
-  create(@Body() createCategoryDto: CreateCategoryDto, @UploadedFile() file) {
-    console.log('createCategoryDto', createCategoryDto, file);
-
-    return;
-    return this.categoriesService.create(createCategoryDto);
+  create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @UploadedFile() file: MulterFileDto,
+  ) {
+    return this.categoriesService.create(createCategoryDto, file);
   }
 
   @Get()
