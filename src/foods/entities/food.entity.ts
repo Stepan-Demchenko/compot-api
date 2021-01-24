@@ -13,7 +13,7 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
-  @Column()
+  @Column({ type: 'character', length: 20, nullable: true })
   title: string;
 
   @Column({ type: 'real' })
@@ -25,7 +25,7 @@ export class Food extends BaseEntity {
   @Column()
   imgSrc: string;
 
-  @Column()
+  @Column({ type: 'character', length: 500, nullable: true })
   description: string;
 
   @Column({ default: 0 })

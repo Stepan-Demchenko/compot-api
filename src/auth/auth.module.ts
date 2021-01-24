@@ -17,10 +17,10 @@ import { RolesGuard } from './guards/roles.guard';
     UsersModule,
     TypeOrmModule.forFeature([User]),
     PassportModule.register({
-      defaultStrategy: 'jwt',
+      defaultStrategy: `${process.env.PASSPORT_STRATEGY}`,
     }),
     JwtModule.register({
-      secret: 'secret-key',
+      secret: `${process.env.JWT_SECRET_KEY}`,
       signOptions: {
         expiresIn: 3600,
       },

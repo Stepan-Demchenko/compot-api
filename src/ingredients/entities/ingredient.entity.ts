@@ -5,7 +5,7 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Ingredient extends BaseEntity {
-  @Column()
+  @Column({ type: 'character', length: 10, nullable: true })
   title: string;
 
   @Column()
