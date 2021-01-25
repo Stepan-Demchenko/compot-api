@@ -9,6 +9,7 @@ import { FoodsModule } from './foods/foods.module';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,12 +24,13 @@ import { IngredientsModule } from './ingredients/ingredients.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: process.env.NODE_ENV === 'development' ? true : false,
     }),
     UsersModule,
     FoodsModule,
     CategoriesModule,
     IngredientsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,8 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
+import { User } from '../users/entities/user.entity';
 import { Ingredient } from './entities/ingredient.entity';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
@@ -14,8 +16,12 @@ export class IngredientsService {
     private readonly ingredientRepository: Repository<Ingredient>,
   ) {}
 
-  create(createIngredientDto: CreateIngredientDto) {
-    const ingredient = this.ingredientRepository.create(createIngredientDto);
+  create(createIngredientDto: CreateIngredientDto, user: User) {
+    const newIngredient: CreateIngredientDto = {
+      ...createIngredientDto,
+      createBy: user,
+    };
+    const ingredient = this.ingredientRepository.create(newIngredient);
     return this.ingredientRepository.save(ingredient);
   }
 
