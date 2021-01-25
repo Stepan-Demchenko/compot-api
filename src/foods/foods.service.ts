@@ -8,7 +8,8 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
-import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { HttpResponse } from '../common/interfaces/http-response.interface';
+import { ResponseFactory } from '../common/factories/response-factory';
 
 @Injectable()
 export class FoodsService {
@@ -17,33 +18,30 @@ export class FoodsService {
     private readonly connection: Connection,
   ) {}
 
-  async findAll(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Food>> {
-    const total = await this.foodRepository.count();
-    const items = await this.foodRepository.find({
+  async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Food[]>> {
+    const total: number = await this.foodRepository.count();
+    const items: Food[] = await this.foodRepository.find({
       skip: paginationQuery.offset || 0,
       take: paginationQuery.limit || 10,
     });
 
-    return new PaginatedResponse<Food>(items, paginationQuery.limit, total);
+    return ResponseFactory.success(items, { total });
   }
 
-  async findOne(id: number): Promise<Food> {
+  async findOne(id: number): Promise<HttpResponse<Food>> {
     const food = await this.foodRepository.findOne(id);
     if (!food) {
       throw new NotFoundException(`Food with id=${id} not found`);
     }
-    return food;
+    return ResponseFactory.success(food);
   }
 
-  async create(createFoodDto: CreateFoodDto) {
+  async create(createFoodDto: CreateFoodDto): Promise<HttpResponse<Food>> {
     const newFood: CreateFoodDto = { ...createFoodDto };
-    newFood.ingredients = arrayOfNumbersToArrayOfObjects(
-      createFoodDto.ingredients as number[],
-    );
+    newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
     const food = this.foodRepository.create(newFood);
-    return this.foodRepository.save(food);
+    const createdFood: Food = await this.foodRepository.save(food);
+    return ResponseFactory.success(createdFood);
   }
 
   async recommendFood(food: Food) {
@@ -71,7 +69,7 @@ export class FoodsService {
     }
   }
 
-  async update(id: number, updateFoodDto: UpdateFoodDto): Promise<Food> {
+  async update(id: number, updateFoodDto: UpdateFoodDto): Promise<HttpResponse<Food>> {
     const food = await this.foodRepository.preload({
       id: id,
       ...updateFoodDto,
@@ -79,14 +77,16 @@ export class FoodsService {
     if (!food) {
       throw new NotFoundException(`Food with id=${id} not found`);
     }
-    return this.foodRepository.save(food);
+    const updatedFood = await this.foodRepository.save(food);
+    return ResponseFactory.success(updatedFood);
   }
 
-  async remove(id: number): Promise<Food> {
+  async remove(id: number): Promise<HttpResponse<Food>> {
     const food = await this.foodRepository.findOne(id);
     if (!food) {
       throw new NotFoundException(`Food with id=${id} not found`);
     }
-    return this.foodRepository.remove(food);
+    const removedFood = await this.foodRepository.remove(food);
+    return ResponseFactory.success(removedFood);
   }
 }

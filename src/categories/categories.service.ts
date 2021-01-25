@@ -6,7 +6,8 @@ import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { PaginatedResponse } from '../common/interfaces/paginated-response';
+import { HttpResponse } from '../common/interfaces/http-response.interface';
+import { ResponseFactory } from '../common/factories/response-factory';
 
 @Injectable()
 export class CategoriesService {
@@ -15,21 +16,20 @@ export class CategoriesService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<HttpResponse<Category>> {
     const category = this.categoryRepository.create(createCategoryDto);
-    return this.categoryRepository.save(category);
+    const createdCategory = await this.categoryRepository.save(category);
+    return ResponseFactory.success(createdCategory);
   }
 
-  async findAll(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Category>> {
+  async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Category[]>> {
     const total = await this.categoryRepository.count();
     const items = await this.categoryRepository.find({
       skip: +paginationQuery.offset || 0,
       take: +paginationQuery.limit || 10,
     });
 
-    return new PaginatedResponse<Category>(items, paginationQuery.limit, total);
+    return ResponseFactory.success(items, { total });
   }
 
   findOne(id: number) {

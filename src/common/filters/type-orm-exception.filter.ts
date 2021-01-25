@@ -1,16 +1,12 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpStatus,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { Response } from 'express';
-import { ErrorResponseInterface } from '../interfaces/error-response.interface';
+
+import { ErrorResponse } from '../interfaces/error-response.interface';
+import { ResponseFactory } from '../factories/response-factory';
 
 @Catch(QueryFailedError)
-export class TypeOrmExceptionFilter<T extends QueryFailedError>
-  implements ExceptionFilter {
+export class TypeOrmExceptionFilter<T extends QueryFailedError> implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
@@ -19,13 +15,13 @@ export class TypeOrmExceptionFilter<T extends QueryFailedError>
     const request = context.getRequest<Request>();
     const { url } = request;
 
-    const errorResponse: ErrorResponseInterface = {
+    const errorResponse: ErrorResponse = {
       path: url,
       timestamp: new Date().toISOString(),
       message,
       detail,
     };
 
-    response.status(HttpStatus.BAD_REQUEST).json(errorResponse);
+    response.status(HttpStatus.BAD_REQUEST).json(ResponseFactory.error(errorResponse));
   }
 }
