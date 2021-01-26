@@ -1,5 +1,6 @@
 import { IsNumber, IsString } from 'class-validator';
 import { Category } from '../../categories/entities/category.entity';
+import { User } from '../../users/entities/user.entity';
 
 export class CreateFoodDto {
   @IsString()
@@ -19,4 +20,6 @@ export class CreateFoodDto {
 
   @IsNumber({ allowNaN: false, allowInfinity: false })
   category: Category;
+
+  createBy: User;
 }
