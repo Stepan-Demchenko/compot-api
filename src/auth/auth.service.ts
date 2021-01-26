@@ -10,10 +10,7 @@ import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly userService: UsersService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly userService: UsersService, private readonly jwtService: JwtService) {}
 
   signUp(createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -30,10 +27,7 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials!');
   }
 
-  private async validatePassword(
-    password: string,
-    user: User,
-  ): Promise<boolean> {
+  private async validatePassword(password: string, user: User): Promise<boolean> {
     const hash = await bcrypt.hash(password, user.salt);
     return hash === user.password;
   }
