@@ -5,14 +5,19 @@ import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { Ingredient } from './entities/ingredient.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { UserRole } from '../common/enums/user-role.enum';
+import { GetUser } from '../common/decorators/get-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @Controller('ingredients')
 export class IngredientsController {
   constructor(private readonly ingredientsService: IngredientsService) {}
 
   @Post()
-  create(@Body() createIngredientDto: CreateIngredientDto): Promise<HttpResponse<Ingredient>> {
-    return this.ingredientsService.create(createIngredientDto);
+  @Auth(UserRole.Admin, UserRole.Moderator)
+  create(@Body() createIngredientDto: CreateIngredientDto, @GetUser() user: User): Promise<HttpResponse<Ingredient>> {
+    return this.ingredientsService.create(createIngredientDto, user);
   }
 
   @Get()
@@ -26,11 +31,13 @@ export class IngredientsController {
   }
 
   @Put(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
   update(@Param('id', ParseIntPipe) id: number, @Body() updateIngredientDto: UpdateIngredientDto) {
     return this.ingredientsService.update(id, updateIngredientDto);
   }
 
   @Delete(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.ingredientsService.remove(id);
   }

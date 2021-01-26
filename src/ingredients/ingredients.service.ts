@@ -8,6 +8,7 @@ import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class IngredientsService {
@@ -16,8 +17,8 @@ export class IngredientsService {
     private readonly ingredientRepository: Repository<Ingredient>,
   ) {}
 
-  async create(createIngredientDto: CreateIngredientDto): Promise<HttpResponse<Ingredient>> {
-    const ingredient = this.ingredientRepository.create(createIngredientDto);
+  async create(createIngredientDto: CreateIngredientDto, user: User): Promise<HttpResponse<Ingredient>> {
+    const ingredient = this.ingredientRepository.create({ ...createIngredientDto, createBy: user });
     const createdIngredient = await this.ingredientRepository.save(ingredient);
     return ResponseFactory.success(createdIngredient);
   }

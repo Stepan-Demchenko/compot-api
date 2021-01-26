@@ -13,10 +13,14 @@ import {
 } from '@nestjs/common';
 
 import { Food } from './entities/food.entity';
-import { CreateFoodDto } from './dto/create-food.dto';
 import { FoodsService } from './foods.service';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { User } from '../users/entities/user.entity';
+import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
+import { UserRole } from '../common/enums/user-role.enum';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { GetUser } from '../common/decorators/get-user.decorator';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 
 @Controller('foods')
@@ -34,18 +38,21 @@ export class FoodsController {
   }
 
   @Post()
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createFoodDto: CreateFoodDto) {
-    await this.foodService.create(createFoodDto);
+  async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User) {
+    await this.foodService.create(createFoodDto, user);
   }
 
   @Put(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.OK)
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateFoodDto: UpdateFoodDto) {
     await this.foodService.update(id, updateFoodDto);
   }
 
   @Delete(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.ACCEPTED)
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.foodService.remove(id);

@@ -1,6 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Food } from './entities/food.entity';
 import { Event } from './entities/event.entity';
@@ -10,6 +9,8 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
+import { User } from '../users/entities/user.entity';
+import { Connection, Repository } from 'typeorm';
 
 @Injectable()
 export class FoodsService {
@@ -36,8 +37,8 @@ export class FoodsService {
     return ResponseFactory.success(food);
   }
 
-  async create(createFoodDto: CreateFoodDto): Promise<HttpResponse<Food>> {
-    const newFood: CreateFoodDto = { ...createFoodDto };
+  async create(createFoodDto: CreateFoodDto, user: User): Promise<HttpResponse<Food>> {
+    const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
     newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
     const food = this.foodRepository.create(newFood);
     const createdFood: Food = await this.foodRepository.save(food);
