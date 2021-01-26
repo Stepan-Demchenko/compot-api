@@ -20,7 +20,7 @@ export class HttpExceptionFilter<T extends HttpException> implements ExceptionFi
             path: request,
             timestamp: new Date().toISOString(),
           }
-        : (exceptionResponse as any);
+        : (exceptionResponse as Record<string, any>);
 
     response.status(status).json(ResponseFactory.error(errorResponse));
   }

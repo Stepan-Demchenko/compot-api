@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { AuthModule } from './auth/auth.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -25,6 +26,9 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DATABASE_NAME,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV === 'development' ? true : false,
+    }),
+    MulterModule.register({
+      dest: './upload',
     }),
     UsersModule,
     FoodsModule,
