@@ -9,11 +9,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<void> {
     try {
       const salt = await bcrypt.genSalt();
       let { password } = createUserDto;
@@ -23,13 +21,10 @@ export class UsersService {
         password,
         salt,
       });
-      return this.userRepository.save(user);
+      await this.userRepository.save(user);
     } catch (error) {
       if (error.code === '23505') {
-        throw new HttpException(
-          `User with ${createUserDto.email} email is already exist`,
-          HttpStatus.FORBIDDEN,
-        );
+        throw new HttpException(`User with ${createUserDto.email} email is already exist`, HttpStatus.FORBIDDEN);
       }
     }
   }
