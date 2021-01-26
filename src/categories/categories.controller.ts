@@ -19,7 +19,7 @@ import {
   MimeTypes,
   validateFileByMimeType,
 } from '../utils/file-upload.utils';
-import { MulterFileDto } from './dto/file.dto';
+import { MulterFileDto } from '../common/dto/file.dto';
 
 @Controller('categories')
 export class CategoriesController {

@@ -8,7 +8,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import { CategoryImage } from './entities/category-image.entity';
-import { MulterFileDto } from './dto/file.dto';
+import { MulterFileDto } from '../common/dto/file.dto';
 
 @Injectable()
 export class CategoriesService {

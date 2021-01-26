@@ -21,6 +21,7 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFileDto } from '../common/dto/file.dto';
 
 @Controller('foods')
 export class FoodsController {
@@ -41,8 +42,11 @@ export class FoodsController {
   @Post()
   @UseInterceptors(FileInterceptor('foodImage'))
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createFoodDto: CreateFoodDto, @UploadedFile() file) {
-    await this.foodService.create(createFoodDto);
+  async create(
+    @Body() createFoodDto: CreateFoodDto,
+    @UploadedFile() file: MulterFileDto,
+  ) {
+    return this.foodService.create(createFoodDto);
   }
 
   @Put(':id')

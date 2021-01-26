@@ -21,6 +21,6 @@ export class IsCategoryNameUnique implements ValidatorConstraintInterface {
 
   defaultMessage(args: ValidationArguments) {
     // here you can provide default error message if validation failed
-    return 'Text ($value) is too short or too long!';
+    return 'Category name should be unique';
   }
 }
