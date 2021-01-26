@@ -28,9 +28,7 @@ export class FoodsController {
   constructor(private readonly foodService: FoodsService) {}
 
   @Get()
-  getAll(
-    @Query() paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Food>> {
+  getAll(@Query() paginationQuery: PaginationQueryDto): Promise<PaginatedResponse<Food>> {
     return this.foodService.findAll(paginationQuery);
   }
 
@@ -49,10 +47,7 @@ export class FoodsController {
   @Put(':id')
   @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.OK)
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateFoodDto: UpdateFoodDto,
-  ) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateFoodDto: UpdateFoodDto) {
     await this.foodService.update(id, updateFoodDto);
   }
 
