@@ -10,7 +10,7 @@ import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArra
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
 import { User } from '../users/entities/user.entity';
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, getRepository } from 'typeorm';
 
 @Injectable()
 export class FoodsService {
@@ -21,12 +21,14 @@ export class FoodsService {
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Food[]>> {
     const total: number = await this.foodRepository.count();
-    const items: Food[] = await this.foodRepository.find({
-      skip: paginationQuery.offset || 0,
-      take: paginationQuery.limit || 10,
-    });
-
-    return ResponseFactory.success(items, { total });
+    const foods: Food[] = await this.foodRepository
+      .createQueryBuilder()
+      .select()
+      .from(Food, 'food')
+      .skip(paginationQuery.offset || 0)
+      .take(paginationQuery.limit || 10)
+      .getMany();
+    return ResponseFactory.success(foods, { total });
   }
 
   async findOne(id: number): Promise<HttpResponse<Food>> {

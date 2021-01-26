@@ -19,10 +19,7 @@ describe('file-upload.utils', () => {
       const result = getFileName({}, mockFileInfo, mockCallbackFn);
       const mockTimeStamp = Date.now();
       (getFileCreationTimestamp as any).mockReturnValueOnce(mockTimeStamp);
-      expect(mockCallbackFn).toHaveBeenCalledWith(
-        null,
-        `burger-${mockTimeStamp}.jpg`,
-      );
+      expect(mockCallbackFn).toHaveBeenCalledWith(null, `burger-${mockTimeStamp}.jpg`);
     });
   });
 });

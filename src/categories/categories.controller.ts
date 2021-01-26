@@ -5,7 +5,7 @@ import { Category } from './entities/category.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { getFileName, MimeTypes, validateFileByMimeType } from '../utils/file-upload.utils';
+import { getFileName, MimeTypes, validateFileByMimeType } from '../common/utils/file-upload.utils';
 import { MulterFileDto } from '../common/dto/file.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
@@ -27,11 +27,7 @@ export class CategoriesController {
       fileFilter: validateFileByMimeType([MimeTypes.PNG, MimeTypes.JPEG]),
     }),
   )
-  create(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @GetUser() user: User,
-    @UploadedFile() file: MulterFileDto,
-  ) {
+  create(@Body() createCategoryDto: CreateCategoryDto, @GetUser() user: User, @UploadedFile() file: MulterFileDto) {
     return this.categoriesService.create(createCategoryDto, file);
   }
 

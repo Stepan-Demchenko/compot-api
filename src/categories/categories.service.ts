@@ -33,12 +33,15 @@ export class CategoriesService {
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Category[]>> {
     const total = await this.categoryRepository.count();
-    const items = await this.categoryRepository.find({
-      skip: +paginationQuery.offset || 0,
-      take: +paginationQuery.limit || 10,
-    });
+    const categories: Category[] = await this.categoryRepository
+      .createQueryBuilder()
+      .select()
+      .from(Category, 'category')
+      .skip(paginationQuery.offset || 0)
+      .take(paginationQuery.limit || 10)
+      .getMany();
 
-    return ResponseFactory.success(items, { total });
+    return ResponseFactory.success(categories, { total });
   }
 
   findOne(id: number) {
