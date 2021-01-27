@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@nestjs/platform-express';
 
 import appConfig from './config/app.config';
 import { AppService } from './app.service';
@@ -10,7 +11,6 @@ import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { AuthModule } from './auth/auth.module';
-import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { MulterModule } from '@nestjs/platform-express';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV === 'development' ? true : false,
+      synchronize: process.env.NODE_ENV === 'development',
     }),
     MulterModule.register({
       dest: './upload',

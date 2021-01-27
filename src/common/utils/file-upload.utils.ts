@@ -1,4 +1,6 @@
 import { HttpException } from '@nestjs/common';
+import { MulterFileDto } from '../dto/file.dto';
+import { Image } from '../../categories/entities/image.entity';
 
 export enum MimeTypes {
   JPEG = 'image/jpeg',

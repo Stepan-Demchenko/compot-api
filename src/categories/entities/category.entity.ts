@@ -8,9 +8,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { Food } from '../../foods/entities/food.entity';
 import { User } from '../../users/entities/user.entity';
-import { CategoryImage } from './category-image.entity';
+import { Image } from './image.entity';
 
 @Entity()
 export class Category extends BaseEntity {
@@ -26,7 +27,7 @@ export class Category extends BaseEntity {
   @ManyToOne(() => User, (user: User) => user.categories, { eager: false })
   createBy: User;
 
-  @ManyToMany(() => CategoryImage, (categoryImage) => categoryImage.categories, { cascade: true })
+  @ManyToMany((type) => Image, (image: Image) => image.categories)
   @JoinTable()
-  images: CategoryImage[];
+  images: Image[];
 }

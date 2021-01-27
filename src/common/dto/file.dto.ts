@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 
 export class MulterFileDto {
   @IsString()
-  originalname: string;
+  originalName: string;
 
   @IsString()
   path: string;

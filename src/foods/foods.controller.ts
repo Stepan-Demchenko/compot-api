@@ -13,19 +13,19 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { Food } from './entities/food.entity';
 import { FoodsService } from './foods.service';
 import { User } from '../users/entities/user.entity';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
-import { UserRole } from '../common/enums/user-role.enum';
+import { MulterFileDto } from '../common/dto/file.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
+import { UserRole } from '../common/enums/user-role.enum';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { MulterFileDto } from '../common/dto/file.dto';
 
 @Controller('foods')
 export class FoodsController {
@@ -45,11 +45,7 @@ export class FoodsController {
   @Auth(UserRole.Admin, UserRole.Moderator)
   @UseInterceptors(FileInterceptor('foodImage'))
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body() createFoodDto: CreateFoodDto,
-    @GetUser() user: User,
-    @UploadedFile() file: MulterFileDto,
-  ) {
+  async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User, @UploadedFile() file: MulterFileDto) {
     return this.foodService.create(createFoodDto, user);
   }
 

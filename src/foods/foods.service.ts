@@ -1,16 +1,16 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Connection, Repository } from 'typeorm';
 
 import { Food } from './entities/food.entity';
 import { Event } from './entities/event.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
-import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
-import { User } from '../users/entities/user.entity';
-import { Connection, Repository, getRepository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { HttpResponse } from '../common/interfaces/http-response.interface';
+import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
 
 @Injectable()
 export class FoodsService {

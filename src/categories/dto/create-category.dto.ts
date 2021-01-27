@@ -1,6 +1,7 @@
 import { IsString, Validate } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { IsCategoryNameUnique } from './is-category-name-unique';
+import { Image } from '../entities/image.entity';
 
 export class CreateCategoryDto {
   @IsString()
@@ -8,4 +9,6 @@ export class CreateCategoryDto {
   name: string;
 
   createBy: User;
+
+  image: Image;
 }
