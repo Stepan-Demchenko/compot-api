@@ -1,5 +1,5 @@
-import { Repository, getConnection, InsertResult } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Repository, InsertResult } from 'typeorm';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Category } from './entities/category.entity';
@@ -10,7 +10,6 @@ import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { User } from '../users/entities/user.entity';
-import { ImageEntity } from '../common/entities/image.entity';
 import { SaveImageService } from '../common/services/save-image/save-image.service';
 
 @Injectable()
@@ -22,11 +21,19 @@ export class CategoriesService {
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto, user: User, file: MulterFile): Promise<HttpResponse<any>> {
-    try {
-      const idOfImage: number = await this.saveImageService.save(file);
-      const createdCategory = this.categoryRepository.createQueryBuilder().insert();
-      return ResponseFactory.success([]);
-    } catch (e) {}
+    const idOfImage = await this.saveImageService.save(file);
+    const createdCategory = await this.categoryRepository
+      .createQueryBuilder()
+      .insert()
+      .values({ ...createCategoryDto, createBy: user })
+      .update()
+      .createQueryBuilder()
+      .relation(Category, 'images')
+      .of(Category)
+      .add(14);
+    // const test = await this.categoryRepository.create({ ...createCategoryDto, createBy: user, images: [idOfImage] });
+    // await this.categoryRepository.save(test);
+    return ResponseFactory.success('ee');
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Category[]>> {

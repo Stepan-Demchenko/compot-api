@@ -29,7 +29,6 @@ export class CategoriesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('image'))
-  @HttpCode(HttpStatus.CREATED)
   create(@Body() createCategoryDto: CreateCategoryDto, @GetUser() user: User, @UploadedFile() file: MulterFile) {
     return this.categoriesService.create(createCategoryDto, user, file);
   }

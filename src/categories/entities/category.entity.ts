@@ -11,7 +11,7 @@ import {
 
 import { Food } from '../../foods/entities/food.entity';
 import { User } from '../../users/entities/user.entity';
-import { ImageEntity } from '../../common/entities/image.entity';
+import { Image } from '../../common/entities/image';
 
 @Entity()
 export class Category extends BaseEntity {
@@ -27,7 +27,7 @@ export class Category extends BaseEntity {
   @ManyToOne(() => User, (user: User) => user.categories, { eager: false })
   createBy: User;
 
-  @ManyToMany((type) => ImageEntity, (image: ImageEntity) => image.categories)
+  @ManyToMany((type) => Image, (image: Image) => image.categories, { cascade: true })
   @JoinTable()
-  images: ImageEntity[];
+  images: Image[];
 }

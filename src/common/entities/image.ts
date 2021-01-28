@@ -3,7 +3,7 @@ import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 
 @Entity()
-export class ImageEntity {
+export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 

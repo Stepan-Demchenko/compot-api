@@ -9,14 +9,14 @@ import { Category } from './entities/category.entity';
 import { CategoriesService } from './categories.service';
 import { CategoriesController } from './categories.controller';
 import { IsCategoryNameUnique } from './dto/is-category-name-unique';
+import { SaveImageService } from '../common/services/save-image/save-image.service';
 import { getFileName, MimeTypes, validateFileByMimeType } from '../common/utils/file-upload.utils';
-import { ImageEntity } from '../common/entities/image.entity';
 
 @Module({
   controllers: [CategoriesController],
-  providers: [CategoriesService, IsCategoryNameUnique],
+  providers: [CategoriesService, IsCategoryNameUnique, SaveImageService],
   imports: [
-    TypeOrmModule.forFeature([Category, ImageEntity]),
+    TypeOrmModule.forFeature([Category]),
     MulterModule.register({
       dest: './upload/images/categories',
       storage: diskStorage({

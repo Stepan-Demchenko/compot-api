@@ -8,7 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { FoodsModule } from './foods/foods.module';
 import { UsersModule } from './users/users.module';
-import { ImageEntity } from './common/entities/image.entity';
+import { Image } from './common/entities/image';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 
@@ -26,7 +26,7 @@ import { IngredientsModule } from './ingredients/ingredients.module';
       database: process.env.DATABASE_NAME,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV === 'development',
-      entities: [ImageEntity],
+      entities: [Image],
     }),
     UsersModule,
     FoodsModule,

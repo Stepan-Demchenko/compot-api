@@ -14,7 +14,6 @@ export class TypeOrmExceptionFilter<T extends QueryFailedError> implements Excep
     const { message, detail } = exception as any;
     const request = context.getRequest<Request>();
     const { url } = request;
-
     const errorResponse: ErrorResponse = {
       path: url,
       timestamp: new Date().toISOString(),
