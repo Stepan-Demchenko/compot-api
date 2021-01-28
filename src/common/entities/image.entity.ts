@@ -1,16 +1,16 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Category } from './category.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity()
-export class Image {
+export class ImageEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'character', nullable: false })
+  @Column()
   src: string;
 
-  @Column({ type: 'character', nullable: false })
+  @Column({ nullable: true })
   originalName: string;
 
   @ManyToMany(() => Category, (category: Category) => category.images)

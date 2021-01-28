@@ -11,14 +11,14 @@ import {
 
 import { Food } from '../../foods/entities/food.entity';
 import { User } from '../../users/entities/user.entity';
-import { Image } from './image.entity';
+import { ImageEntity } from '../../common/entities/image.entity';
 
 @Entity()
 export class Category extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'character', length: 10, nullable: true })
+  @Column({ type: 'character', length: 10, nullable: true, unique: true })
   name: string;
 
   @OneToMany(() => Food, (food: Food) => food.category)
@@ -27,7 +27,7 @@ export class Category extends BaseEntity {
   @ManyToOne(() => User, (user: User) => user.categories, { eager: false })
   createBy: User;
 
-  @ManyToMany((type) => Image, (image: Image) => image.categories)
+  @ManyToMany((type) => ImageEntity, (image: ImageEntity) => image.categories)
   @JoinTable()
-  images: Image[];
+  images: ImageEntity[];
 }

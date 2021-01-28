@@ -1,6 +1,4 @@
 import { HttpException } from '@nestjs/common';
-import { MulterFileDto } from '../dto/file.dto';
-import { Image } from '../../categories/entities/image.entity';
 
 export enum MimeTypes {
   JPEG = 'image/jpeg',
@@ -16,8 +14,9 @@ export function validateFileByMimeType(acceptableMimeTypes: MimeTypes[]) {
     const isFileMimeTypeAcceptable = acceptableMimeTypes.includes(file.mimetype);
     if (!isFileMimeTypeAcceptable) {
       cb(new HttpException('This file format is not acceptable', 409), false);
+    } else {
+      cb(null, true);
     }
-    cb(null, true);
   };
 }
 

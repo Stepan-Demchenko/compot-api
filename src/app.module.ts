@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MulterModule } from '@nestjs/platform-express';
 
-import appConfig from './config/app.config';
 import { AppService } from './app.service';
+import appConfig from './config/app.config';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { FoodsModule } from './foods/foods.module';
 import { UsersModule } from './users/users.module';
+import { ImageEntity } from './common/entities/image.entity';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,9 +26,7 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DATABASE_NAME,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV === 'development',
-    }),
-    MulterModule.register({
-      dest: './upload',
+      entities: [ImageEntity],
     }),
     UsersModule,
     FoodsModule,
