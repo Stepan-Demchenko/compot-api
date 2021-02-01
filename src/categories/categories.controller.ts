@@ -4,7 +4,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -21,6 +24,7 @@ import { GetUser } from '../common/decorators/get-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -28,8 +32,13 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('image'))
-  create(@Body() createCategoryDto: CreateCategoryDto, @GetUser() user: User, @UploadedFile() file: MulterFile) {
+  create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @GetUser() user: User,
+    @UploadedFile() file: MulterFile,
+  ): Promise<void> {
     return this.categoriesService.create(createCategoryDto, user, file);
   }
 
@@ -38,18 +47,20 @@ export class CategoriesController {
     return this.categoriesService.findAll(paginationQuery);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.categoriesService.findOne(+id);
-  // }
-  //
-  // @Put(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateCategoryDto: UpdateCategoryDto,
-  // ) {
-  //   return this.categoriesService.update(+id, updateCategoryDto);
-  // }
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<HttpResponse<Category>> {
+    return this.categoriesService.findOne(id);
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.ACCEPTED)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @UploadedFile() file: MulterFile,
+  ) {
+    return this.categoriesService.update(id, updateCategoryDto, file);
+  }
   //
   // @Delete(':id')
   // remove(@Param('id') id: string) {
