@@ -34,7 +34,7 @@ export class CategoriesController {
   @Post()
   @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('images'))
   create(
     @Body() createCategoryDto: CreateCategoryDto,
     @GetUser() user: User,
@@ -56,7 +56,7 @@ export class CategoriesController {
   @Put(':id')
   @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.ACCEPTED)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('images'))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,

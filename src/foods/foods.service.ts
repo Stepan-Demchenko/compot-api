@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Connection, Repository } from 'typeorm';
+import { InsertResult, Repository } from 'typeorm';
 
 import { Food } from './entities/food.entity';
 import { Event } from './entities/event.entity';
@@ -11,12 +11,14 @@ import { ResponseFactory } from '../common/factories/response-factory';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
+import { ImageService } from '../common/services/save-image/image.service';
+import { MulterFile } from '../common/interfaces/multer-file.interface';
 
 @Injectable()
 export class FoodsService {
   constructor(
     @InjectRepository(Food) private readonly foodRepository: Repository<Food>,
-    private readonly connection: Connection,
+    private readonly imageService: ImageService,
   ) {}
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Food[]>> {
@@ -39,12 +41,16 @@ export class FoodsService {
     return ResponseFactory.success(food);
   }
 
-  async create(createFoodDto: CreateFoodDto, user: User): Promise<HttpResponse<Food>> {
-    const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
-    newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
-    const food = this.foodRepository.create(newFood);
-    const createdFood: Food = await this.foodRepository.save(food);
-    return ResponseFactory.success(createdFood);
+  async create(createFoodDto: CreateFoodDto, user: User, file: MulterFile): Promise<void> {
+    // const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
+    // newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
+    // const food = this.foodRepository.create(newFood);
+    // const createdFood: Food = await this.foodRepository.save(food);
+    const idOfImage: number = await this.imageService.save(file);
+    const idOfFood: InsertResult = await this.foodRepository
+      .createQueryBuilder()
+      .insert()
+      .values({ ...createFoodDto, createBy: user });
   }
 
   async recommendFood(food: Food) {

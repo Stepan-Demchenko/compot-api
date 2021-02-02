@@ -1,47 +1,91 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { Image } from '../common/entities/image';
+import { User } from '../users/entities/user.entity';
 import { Ingredient } from './entities/ingredient.entity';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ResponseFactory } from '../common/factories/response-factory';
-import { User } from '../users/entities/user.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { MulterFile } from '../common/interfaces/multer-file.interface';
+import { ImageService } from '../common/services/save-image/image.service';
+import { HttpResponse } from '../common/interfaces/http-response.interface';
 
 @Injectable()
 export class IngredientsService {
   constructor(
-    @InjectRepository(Ingredient)
-    private readonly ingredientRepository: Repository<Ingredient>,
+    @InjectRepository(Ingredient) private readonly ingredientRepository: Repository<Ingredient>,
+    private readonly imageService: ImageService,
   ) {}
 
-  async create(createIngredientDto: CreateIngredientDto, user: User): Promise<HttpResponse<Ingredient>> {
-    const ingredient = this.ingredientRepository.create({ ...createIngredientDto, createBy: user });
-    const createdIngredient = await this.ingredientRepository.save(ingredient);
-    return ResponseFactory.success(createdIngredient);
+  async create(createIngredientDto: CreateIngredientDto, user: User, file: MulterFile): Promise<void> {
+    const idOfImage: number = await this.imageService.save(file);
+    const idOfIngredient: InsertResult = await this.ingredientRepository
+      .createQueryBuilder()
+      .insert()
+      .values({ ...createIngredientDto, createBy: user })
+      .returning('id')
+      .execute();
+    await this.ingredientRepository
+      .createQueryBuilder()
+      .relation(Ingredient, 'images')
+      .of(+idOfIngredient.identifiers[0].id)
+      .add(idOfImage);
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Ingredient[]>> {
     const total: number = await this.ingredientRepository.count();
-    const items: Ingredient[] = await this.ingredientRepository.find({
-      skip: +paginationQuery.offset || 0,
-      take: +paginationQuery.limit || 10,
-    });
+    const items: Ingredient[] = await this.ingredientRepository
+      .createQueryBuilder()
+      .select()
+      .from(Ingredient, 'ingredient')
+      .skip(paginationQuery.offset || 0)
+      .take(paginationQuery.limit || 10)
+      .getMany();
 
     return ResponseFactory.success(items, { total });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ingredient`;
+  async findOne(id: number): Promise<HttpResponse<Ingredient>> {
+    const foundedIngredient: Ingredient = await this.ingredientRepository
+      .createQueryBuilder('ingredient')
+      .leftJoinAndSelect('ingredient.images', 'images')
+      .where('ingredient.id = :id', { id })
+      .getOneOrFail();
+    return ResponseFactory.success(foundedIngredient);
   }
 
-  update(id: number, updateIngredientDto: UpdateIngredientDto) {
-    return `This action updates a #${id} ingredient`;
+  async update(id: number, updateIngredientDto: UpdateIngredientDto, file: MulterFile): Promise<void> {
+    const foundIngredient: HttpResponse<Ingredient> = await this.findOne(id);
+    if (file) {
+      foundIngredient.data.images.map(async (image: Image) => await this.imageService.update(file, image));
+      await this.ingredientRepository
+        .createQueryBuilder()
+        .update(Ingredient)
+        .set({ ...updateIngredientDto })
+        .where('id=:id', { id })
+        .execute();
+    } else {
+      await this.ingredientRepository
+        .createQueryBuilder()
+        .update(Ingredient)
+        .set({ ...updateIngredientDto })
+        .where('id=:id', { id })
+        .execute();
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ingredient`;
+  async remove(id: number): Promise<void> {
+    const foundedIngredient: HttpResponse<Ingredient> = await this.findOne(id);
+    if (foundedIngredient.data.id) {
+      foundedIngredient.data.images.map(async (image: Image) => await this.imageService.delete(image));
+      await this.ingredientRepository
+        .createQueryBuilder()
+        .delete()
+        .where('id=:id', { id: foundedIngredient.data.id })
+        .execute();
+    }
   }
 }

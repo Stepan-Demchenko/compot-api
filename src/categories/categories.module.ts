@@ -6,10 +6,10 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { Category } from './entities/category.entity';
+import { CommonModule } from '../common/common.module';
 import { CategoriesService } from './categories.service';
 import { CategoriesController } from './categories.controller';
 import { getFileName, MimeTypes, validateFileByMimeType } from '../common/utils/file-upload.utils';
-import { CommonModule } from '../common/common.module';
 
 @Module({
   controllers: [CategoriesController],
@@ -19,7 +19,7 @@ import { CommonModule } from '../common/common.module';
     MulterModule.register({
       dest: './upload/images/categories',
       storage: diskStorage({
-        destination: './upload/image',
+        destination: './upload/images/categories',
         filename: getFileName,
       }),
       fileFilter: validateFileByMimeType([MimeTypes.PNG, MimeTypes.JPEG]),

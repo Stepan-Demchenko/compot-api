@@ -43,17 +43,22 @@ export class FoodsController {
 
   @Post()
   @Auth(UserRole.Admin, UserRole.Moderator)
-  @UseInterceptors(FileInterceptor('foodImage'))
+  @UseInterceptors(FileInterceptor('images'))
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User, @UploadedFile() file: MulterFile) {
-    return this.foodService.create(createFoodDto, user);
+    return this.foodService.create(createFoodDto, user, file);
   }
 
   @Put(':id')
   @Auth(UserRole.Admin, UserRole.Moderator)
+  @UseInterceptors(FileInterceptor('images'))
   @HttpCode(HttpStatus.OK)
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateFoodDto: UpdateFoodDto) {
-    await this.foodService.update(id, updateFoodDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateFoodDto: UpdateFoodDto,
+    @UploadedFile() file: MulterFile,
+  ) {
+    await this.foodService.update(id, updateFoodDto, file);
   }
 
   @Delete(':id')

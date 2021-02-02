@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, InsertResult } from 'typeorm';
+import { InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Image } from '../common/entities/image';
@@ -36,7 +36,7 @@ export class CategoriesService {
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Category[]>> {
-    const total = await this.categoryRepository.count();
+    const total: number = await this.categoryRepository.count();
     const categories: Category[] = await this.categoryRepository
       .createQueryBuilder()
       .select()
@@ -49,16 +49,16 @@ export class CategoriesService {
   }
 
   async findOne(id: number): Promise<HttpResponse<Category>> {
-    const foundedCategory = await this.categoryRepository
+    const foundedCategory: Category = await this.categoryRepository
       .createQueryBuilder('category')
       .leftJoinAndSelect('category.images', 'image')
       .where('category.id = :id', { id })
-      .getOne();
+      .getOneOrFail();
     return ResponseFactory.success(foundedCategory);
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto, file?: MulterFile): Promise<void> {
-    const foundedCategory = await this.findOne(id);
+    const foundedCategory: HttpResponse<Category> = await this.findOne(id);
     if (file) {
       foundedCategory.data.images.map(async (image: Image) => await this.imageService.update(file, image));
       await this.categoryRepository
@@ -71,14 +71,14 @@ export class CategoriesService {
       await this.categoryRepository
         .createQueryBuilder()
         .update(Category)
-        .set(updateCategoryDto)
+        .set({ ...updateCategoryDto })
         .where('id = :id', { id })
         .execute();
     }
   }
 
   async remove(id: number): Promise<void> {
-    const foundedCategory = await this.findOne(id);
+    const foundedCategory: HttpResponse<Category> = await this.findOne(id);
     if (foundedCategory.data.id) {
       foundedCategory.data.images.map(async (image: Image) => await this.imageService.delete(image));
       await this.categoryRepository
