@@ -2,26 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { Repository, InsertResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Category } from './entities/category.entity';
+import { Image } from '../common/entities/image';
 import { User } from '../users/entities/user.entity';
+import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ResponseFactory } from '../common/factories/response-factory';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
-import { SaveImageService } from '../common/services/save-image/save-image.service';
-import { Image } from '../common/entities/image';
+import { ImageService } from '../common/services/save-image/image.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
-    private readonly saveImageService: SaveImageService,
+    private readonly imageService: ImageService,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto, user: User, file: MulterFile): Promise<void> {
-    const idOfImage: number = await this.saveImageService.save(file);
+    const idOfImage: number = await this.imageService.save(file);
     const idOfCategory: InsertResult = await this.categoryRepository
       .createQueryBuilder()
       .insert()
@@ -57,14 +57,14 @@ export class CategoriesService {
     return ResponseFactory.success(foundedCategory);
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto, file?: MulterFile) {
+  async update(id: number, updateCategoryDto: UpdateCategoryDto, file?: MulterFile): Promise<void> {
     const foundedCategory = await this.findOne(id);
     if (file) {
-      foundedCategory.data.images.map(async (image: Image) => this.saveImageService.update(file, image.id, image.src));
+      foundedCategory.data.images.map(async (image: Image) => await this.imageService.update(file, image));
       await this.categoryRepository
         .createQueryBuilder()
         .update(Category)
-        .set(updateCategoryDto)
+        .set({ ...updateCategoryDto })
         .where('id = :id', { id })
         .execute();
     } else {
@@ -77,7 +77,15 @@ export class CategoriesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number): Promise<void> {
+    const foundedCategory = await this.findOne(id);
+    if (foundedCategory.data.id) {
+      foundedCategory.data.images.map(async (image: Image) => await this.imageService.delete(image));
+      await this.categoryRepository
+        .createQueryBuilder()
+        .delete()
+        .where('id = :id', { id: foundedCategory.data.id })
+        .execute();
+    }
   }
 }

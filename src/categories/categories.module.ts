@@ -8,13 +8,12 @@ import { UsersModule } from '../users/users.module';
 import { Category } from './entities/category.entity';
 import { CategoriesService } from './categories.service';
 import { CategoriesController } from './categories.controller';
-import { IsCategoryNameUnique } from './dto/is-category-name-unique';
-import { SaveImageService } from '../common/services/save-image/save-image.service';
 import { getFileName, MimeTypes, validateFileByMimeType } from '../common/utils/file-upload.utils';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   controllers: [CategoriesController],
-  providers: [CategoriesService, IsCategoryNameUnique, SaveImageService],
+  providers: [CategoriesService],
   imports: [
     TypeOrmModule.forFeature([Category]),
     MulterModule.register({
@@ -27,6 +26,7 @@ import { getFileName, MimeTypes, validateFileByMimeType } from '../common/utils/
     }),
     AuthModule,
     UsersModule,
+    CommonModule,
   ],
 })
 export class CategoriesModule {}

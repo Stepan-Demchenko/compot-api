@@ -1,11 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
 import { Response } from 'express';
+import { QueryFailedError } from 'typeorm';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 
-import { ErrorResponse } from '../interfaces/error-response.interface';
 import { ResponseFactory } from '../factories/response-factory';
+import { ErrorResponse } from '../interfaces/error-response.interface';
+import { UpdateValuesMissingError } from 'typeorm/error/UpdateValuesMissingError';
 
-@Catch(QueryFailedError)
+@Catch(QueryFailedError, UpdateValuesMissingError)
 export class TypeOrmExceptionFilter<T extends QueryFailedError> implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
     const context = host.switchToHttp();

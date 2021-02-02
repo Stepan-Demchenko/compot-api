@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -10,28 +11,28 @@ import {
   Put,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { User } from '../users/entities/user.entity';
 import { Category } from './entities/category.entity';
-import { MulterFile } from '../common/interfaces/multer-file.interface';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { CategoriesService } from './categories.service';
+import { UserRole } from '../common/enums/user-role.enum';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
-import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('image'))
   create(
@@ -53,17 +54,21 @@ export class CategoriesController {
   }
 
   @Put(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
   @HttpCode(HttpStatus.ACCEPTED)
+  @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @UploadedFile() file: MulterFile,
-  ) {
+  ): Promise<void> {
     return this.categoriesService.update(id, updateCategoryDto, file);
   }
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.categoriesService.remove(+id);
-  // }
+
+  @Delete(':id')
+  @Auth(UserRole.Admin, UserRole.Moderator)
+  @HttpCode(HttpStatus.ACCEPTED)
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.categoriesService.remove(id);
+  }
 }
