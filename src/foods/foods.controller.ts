@@ -20,10 +20,10 @@ import { FoodsService } from './foods.service';
 import { User } from '../users/entities/user.entity';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
-import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { GetUser } from '../common/decorators/get-user.decorator';
+import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 
@@ -46,6 +46,7 @@ export class FoodsController {
   @UseInterceptors(FileInterceptor('images'))
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User, @UploadedFile() file: MulterFile) {
+    console.log(createFoodDto);
     return this.foodService.create(createFoodDto, user, file);
   }
 
@@ -58,7 +59,7 @@ export class FoodsController {
     @Body() updateFoodDto: UpdateFoodDto,
     @UploadedFile() file: MulterFile,
   ) {
-    await this.foodService.update(id, updateFoodDto, file);
+    await this.foodService.update(id, updateFoodDto);
   }
 
   @Delete(':id')

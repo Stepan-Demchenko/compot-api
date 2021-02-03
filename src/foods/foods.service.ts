@@ -3,16 +3,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InsertResult, Repository } from 'typeorm';
 
 import { Food } from './entities/food.entity';
-import { Event } from './entities/event.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { ResponseFactory } from '../common/factories/response-factory';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
-import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
 import { ImageService } from '../common/services/save-image/image.service';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
+import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
 
 @Injectable()
 export class FoodsService {
@@ -42,6 +41,9 @@ export class FoodsService {
   }
 
   async create(createFoodDto: CreateFoodDto, user: User, file: MulterFile): Promise<void> {
+    createFoodDto.weight = +createFoodDto.weight;
+    createFoodDto.price = +createFoodDto.price;
+
     // const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
     // newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
     // const food = this.foodRepository.create(newFood);
@@ -50,33 +52,44 @@ export class FoodsService {
     const idOfFood: InsertResult = await this.foodRepository
       .createQueryBuilder()
       .insert()
-      .values({ ...createFoodDto, createBy: user });
+      .values({
+        ...createFoodDto,
+        createBy: user,
+        ingredients: arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]),
+      })
+      .returning('id')
+      .execute();
+    await this.foodRepository
+      .createQueryBuilder()
+      .relation(Food, 'images')
+      .of(+idOfFood.identifiers[0].id)
+      .add(idOfImage);
   }
 
-  async recommendFood(food: Food) {
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      food.recommendations++;
-
-      const recommendEvent = new Event();
-      recommendEvent.name = 'recommend_food';
-      recommendEvent.type = 'food';
-      recommendEvent.payload = { foodId: food.id };
-
-      await queryRunner.manager.save(food);
-      await queryRunner.manager.save(recommendEvent);
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  // async recommendFood(food: Food) {
+  //   const queryRunner = this.connection.createQueryRunner();
+  //
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+  //
+  //   try {
+  //     food.recommendations++;
+  //
+  //     const recommendEvent = new Event();
+  //     recommendEvent.name = 'recommend_food';
+  //     recommendEvent.type = 'food';
+  //     recommendEvent.payload = { foodId: food.id };
+  //
+  //     await queryRunner.manager.save(food);
+  //     await queryRunner.manager.save(recommendEvent);
+  //
+  //     await queryRunner.commitTransaction();
+  //   } catch (err) {
+  //     await queryRunner.rollbackTransaction();
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   async update(id: number, updateFoodDto: UpdateFoodDto): Promise<HttpResponse<Food>> {
     const food = await this.foodRepository.preload({
