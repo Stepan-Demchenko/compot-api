@@ -1,7 +1,7 @@
 import { IsArray, IsNumber, IsString } from 'class-validator';
-import { Category } from '../../categories/entities/category.entity';
 import { User } from '../../users/entities/user.entity';
 import { Type } from 'class-transformer';
+import { Ingredient } from '../../ingredients/entities/ingredient.entity';
 
 export class CreateFoodDto {
   @IsString()
@@ -18,10 +18,8 @@ export class CreateFoodDto {
   @IsString()
   description: string;
 
-  @Type(() => Number)
   @IsArray()
-  @IsNumber({}, { each: true })
-  ingredients: any[];
+  ingredients: Ingredient[];
 
   // @IsNumber({ allowNaN: false, allowInfinity: false })
   // category: Category;

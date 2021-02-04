@@ -12,6 +12,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -26,6 +27,7 @@ import { GetUser } from '../common/decorators/get-user.decorator';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
+import { CreateFoodPipe } from './pipes/create-food.pipe';
 
 @Controller('foods')
 export class FoodsController {
@@ -42,11 +44,11 @@ export class FoodsController {
   }
 
   @Post()
+  @UsePipes(new CreateFoodPipe())
   @Auth(UserRole.Admin, UserRole.Moderator)
   @UseInterceptors(FileInterceptor('images'))
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createFoodDto: CreateFoodDto, @GetUser() user: User, @UploadedFile() file: MulterFile) {
-    console.log(createFoodDto);
     return this.foodService.create(createFoodDto, user, file);
   }
 

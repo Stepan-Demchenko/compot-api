@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InsertResult, Repository } from 'typeorm';
+import { InsertResult, Repository, getManager } from 'typeorm';
 
 import { Food } from './entities/food.entity';
 import { User } from '../users/entities/user.entity';
@@ -11,7 +11,6 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ImageService } from '../common/services/save-image/image.service';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
-import arrayOfNumbersToArrayOfObjects from '../common/utils/arrayOfNumbersToArrayOfObjects';
 
 @Injectable()
 export class FoodsService {
@@ -43,27 +42,50 @@ export class FoodsService {
   async create(createFoodDto: CreateFoodDto, user: User, file: MulterFile): Promise<void> {
     createFoodDto.weight = +createFoodDto.weight;
     createFoodDto.price = +createFoodDto.price;
-
-    // const newFood: CreateFoodDto = { ...createFoodDto, createBy: user };
-    // newFood.ingredients = arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]);
-    // const food = this.foodRepository.create(newFood);
-    // const createdFood: Food = await this.foodRepository.save(food);
     const idOfImage: number = await this.imageService.save(file);
-    const idOfFood: InsertResult = await this.foodRepository
-      .createQueryBuilder()
-      .insert()
-      .values({
-        ...createFoodDto,
-        createBy: user,
-        ingredients: arrayOfNumbersToArrayOfObjects(createFoodDto.ingredients as number[]),
-      })
-      .returning('id')
-      .execute();
-    await this.foodRepository
-      .createQueryBuilder()
-      .relation(Food, 'images')
-      .of(+idOfFood.identifiers[0].id)
-      .add(idOfImage);
+    await getManager().transaction(async (transactionalEntityManager) => {
+      const idOfFood: InsertResult = await transactionalEntityManager
+        .createQueryBuilder()
+        .insert()
+        .into(Food)
+        .values({
+          ...createFoodDto,
+          createBy: user,
+        })
+        .returning('id')
+        .execute();
+      await transactionalEntityManager
+        .createQueryBuilder()
+        .relation(Food, 'images')
+        .of(+idOfFood.identifiers[0].id)
+        .add(idOfImage);
+      await transactionalEntityManager
+        .createQueryBuilder()
+        .relation(Food, 'ingredients')
+        .of(+idOfFood.identifiers[0].id)
+        .add(createFoodDto.ingredients);
+    });
+    // const idOfFood: InsertResult = await this.foodRepository
+    //   .createQueryBuilder()
+    //   .insert()
+    //   .values({
+    //     ...createFoodDto,
+    //     createBy: user,
+    //     ingredients: createFoodDto.ingredients,
+    //   })
+    //   .returning('id')
+    //   .execute();
+    // await this.foodRepository
+    //   .createQueryBuilder()
+    //   .relation(Food, 'images')
+    //   .of(+idOfFood.identifiers[0].id)
+    //   .add(idOfImage);
+    //
+    // await this.foodRepository
+    //   .createQueryBuilder()
+    //   .relation(Food, 'ingredients')
+    //   .of(+idOfFood.identifiers[0].id)
+    //   .add(createFoodDto.ingredients);
   }
 
   // async recommendFood(food: Food) {
