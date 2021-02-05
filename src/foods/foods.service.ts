@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InsertResult, Repository, getManager } from 'typeorm';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InsertResult, Repository, Connection } from 'typeorm';
 
 import { Food } from './entities/food.entity';
 import { User } from '../users/entities/user.entity';
@@ -11,12 +11,14 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
 import { ImageService } from '../common/services/save-image/image.service';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
+import { Image } from '../common/entities/image';
 
 @Injectable()
 export class FoodsService {
   constructor(
     @InjectRepository(Food) private readonly foodRepository: Repository<Food>,
     private readonly imageService: ImageService,
+    private readonly connection: Connection,
   ) {}
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Food[]>> {
@@ -32,19 +34,21 @@ export class FoodsService {
   }
 
   async findOne(id: number): Promise<HttpResponse<Food>> {
-    const food = await this.foodRepository.findOne(id);
-    if (!food) {
-      throw new NotFoundException(`Food with id=${id} not found`);
-    }
-    return ResponseFactory.success(food);
+    const foundedFood = await this.foodRepository
+      .createQueryBuilder('food')
+      .leftJoinAndSelect('food.images', 'image')
+      .where('food.id=:id', { id })
+      .getOneOrFail();
+    return ResponseFactory.success(foundedFood);
   }
 
   async create(createFoodDto: CreateFoodDto, user: User, file: MulterFile): Promise<void> {
-    createFoodDto.weight = +createFoodDto.weight;
-    createFoodDto.price = +createFoodDto.price;
-    const idOfImage: number = await this.imageService.save(file);
-    await getManager().transaction(async (transactionalEntityManager) => {
-      const idOfFood: InsertResult = await transactionalEntityManager
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const idOfImage: number = await this.imageService.save(file);
+      const idOfFood: InsertResult = await queryRunner.manager
         .createQueryBuilder()
         .insert()
         .into(Food)
@@ -54,75 +58,53 @@ export class FoodsService {
         })
         .returning('id')
         .execute();
-      await transactionalEntityManager
+      await queryRunner.manager
         .createQueryBuilder()
         .relation(Food, 'images')
         .of(+idOfFood.identifiers[0].id)
         .add(idOfImage);
-      await transactionalEntityManager
+      await queryRunner.manager
         .createQueryBuilder()
         .relation(Food, 'ingredients')
         .of(+idOfFood.identifiers[0].id)
         .add(createFoodDto.ingredients);
-    });
-    // const idOfFood: InsertResult = await this.foodRepository
-    //   .createQueryBuilder()
-    //   .insert()
-    //   .values({
-    //     ...createFoodDto,
-    //     createBy: user,
-    //     ingredients: createFoodDto.ingredients,
-    //   })
-    //   .returning('id')
-    //   .execute();
-    // await this.foodRepository
-    //   .createQueryBuilder()
-    //   .relation(Food, 'images')
-    //   .of(+idOfFood.identifiers[0].id)
-    //   .add(idOfImage);
-    //
-    // await this.foodRepository
-    //   .createQueryBuilder()
-    //   .relation(Food, 'ingredients')
-    //   .of(+idOfFood.identifiers[0].id)
-    //   .add(createFoodDto.ingredients);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(error);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  // async recommendFood(food: Food) {
-  //   const queryRunner = this.connection.createQueryRunner();
-  //
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-  //
-  //   try {
-  //     food.recommendations++;
-  //
-  //     const recommendEvent = new Event();
-  //     recommendEvent.name = 'recommend_food';
-  //     recommendEvent.type = 'food';
-  //     recommendEvent.payload = { foodId: food.id };
-  //
-  //     await queryRunner.manager.save(food);
-  //     await queryRunner.manager.save(recommendEvent);
-  //
-  //     await queryRunner.commitTransaction();
-  //   } catch (err) {
-  //     await queryRunner.rollbackTransaction();
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
-
-  async update(id: number, updateFoodDto: UpdateFoodDto): Promise<HttpResponse<Food>> {
-    const food = await this.foodRepository.preload({
-      id: id,
-      ...updateFoodDto,
-    });
-    if (!food) {
-      throw new NotFoundException(`Food with id=${id} not found`);
+  async update(id: number, updateFoodDto: UpdateFoodDto, file?: MulterFile): Promise<void> {
+    const foundedFood: HttpResponse<Food> = await this.findOne(id);
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      if (file) {
+        foundedFood.data.images.map(async (image: Image) => await this.imageService.update(file, image));
+        await queryRunner.manager
+          .createQueryBuilder()
+          .update(Food)
+          .set({ ...updateFoodDto })
+          .where('id = :id', { id })
+          .execute();
+      } else {
+        await queryRunner.manager
+          .createQueryBuilder()
+          .update(Food)
+          .set({ ...updateFoodDto })
+          .where('id = :id', { id })
+          .execute();
+      }
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(error);
+    } finally {
+      await queryRunner.release();
     }
-    const updatedFood = await this.foodRepository.save(food);
-    return ResponseFactory.success(updatedFood);
   }
 
   async remove(id: number): Promise<HttpResponse<Food>> {

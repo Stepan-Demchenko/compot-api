@@ -23,11 +23,11 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
+import { CreateFoodPipe } from './pipes/create-food.pipe';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { MulterFile } from '../common/interfaces/multer-file.interface';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { HttpResponse } from '../common/interfaces/http-response.interface';
-import { CreateFoodPipe } from './pipes/create-food.pipe';
 
 @Controller('foods')
 export class FoodsController {

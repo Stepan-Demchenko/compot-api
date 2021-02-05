@@ -10,6 +10,8 @@ export class CreateFoodPipe implements PipeTransform {
       return value;
     }
     if (value.ingredients) {
+      value.weight = +value.weight;
+      value.price = +value.price;
       value.ingredients = JSON.parse(value.ingredients);
       value.ingredients = arrayOfNumbersToArrayOfObjects(value.ingredients);
     }
