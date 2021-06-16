@@ -21,6 +21,9 @@ export class Food extends BaseEntity {
   @JoinTable()
   images: Image[];
 
+  @RelationId((food: Food) => food.images)
+  imageIds: number[];
+
   @Column({ type: 'character', length: 500, nullable: true })
   description: string;
 

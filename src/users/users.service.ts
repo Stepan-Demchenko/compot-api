@@ -21,7 +21,7 @@ export class UsersService {
         password,
         salt,
       });
-      await this.userRepository.save(user);
+      await getConnection().createQueryBuilder().insert().into(User).values(user).execute();
     } catch (error) {
       if (error.code === '23505') {
         throw new HttpException(`User with ${createUserDto.email} email is already exist`, HttpStatus.FORBIDDEN);

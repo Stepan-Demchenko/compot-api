@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InsertResult, Repository, Connection } from 'typeorm';
 
 import { Food } from './entities/food.entity';
@@ -24,9 +24,8 @@ export class FoodsService {
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Food[]>> {
     const total: number = await this.foodRepository.count();
     const foods: Food[] = await this.foodRepository
-      .createQueryBuilder()
-      .select()
-      .from(Food, 'food')
+      .createQueryBuilder('food')
+      .leftJoinAndSelect('food.images', 'image')
       .skip(paginationQuery.offset || 0)
       .take(paginationQuery.limit || 10)
       .getMany();
@@ -34,12 +33,16 @@ export class FoodsService {
   }
 
   async findOne(id: number): Promise<HttpResponse<Food>> {
-    const foundedFood = await this.foodRepository
-      .createQueryBuilder('food')
-      .leftJoinAndSelect('food.images', 'image')
-      .where('food.id=:id', { id })
-      .getOneOrFail();
-    return ResponseFactory.success(foundedFood);
+    try {
+      const foundedFood = await this.foodRepository
+        .createQueryBuilder('food')
+        .leftJoinAndSelect('food.images', 'image')
+        .where('food.id=:id', { id })
+        .getOneOrFail();
+      return ResponseFactory.success(foundedFood);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async create(createFoodDto: CreateFoodDto, user: User, file: MulterFile): Promise<void> {
@@ -85,20 +88,13 @@ export class FoodsService {
     try {
       if (file) {
         foundedFood.data.images.map(async (image: Image) => await this.imageService.update(file, image));
-        await queryRunner.manager
-          .createQueryBuilder()
-          .update(Food)
-          .set({ ...updateFoodDto })
-          .where('id = :id', { id })
-          .execute();
-      } else {
-        await queryRunner.manager
-          .createQueryBuilder()
-          .update(Food)
-          .set({ ...updateFoodDto })
-          .where('id = :id', { id })
-          .execute();
       }
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(Food)
+        .set({ ...updateFoodDto })
+        .where('id = :id', { id })
+        .execute();
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(error);
@@ -107,12 +103,14 @@ export class FoodsService {
     }
   }
 
-  async remove(id: number): Promise<HttpResponse<Food>> {
-    const food = await this.foodRepository.findOne(id);
-    if (!food) {
-      throw new NotFoundException(`Food with id=${id} not found`);
+  async remove(id: number): Promise<any> {
+    const foundedFood: HttpResponse<Food> = await this.findOne(id);
+    try {
+      const queryRunner = this.connection.createQueryRunner();
+      await queryRunner.manager.createQueryBuilder().delete().from(Food).where('id = :id', { id }).execute();
+      await this.imageService.delete(foundedFood.data.images[0]);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    const removedFood = await this.foodRepository.remove(food);
-    return ResponseFactory.success(removedFood);
   }
 }
