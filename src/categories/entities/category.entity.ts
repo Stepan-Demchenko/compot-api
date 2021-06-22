@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 
 import { Food } from '../../foods/entities/food.entity';
@@ -18,7 +19,7 @@ export class Category extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'character', length: 10, nullable: true, unique: true })
+  @Column({ type: 'character', length: 50, nullable: true, unique: true })
   name: string;
 
   @OneToMany(() => Food, (food: Food) => food.category)
@@ -30,4 +31,7 @@ export class Category extends BaseEntity {
   @ManyToMany((type) => Image, (image: Image) => image.categories, { cascade: true })
   @JoinTable()
   images: Image[];
+
+  @RelationId((food: Food) => food.images)
+  imageIds: number[];
 }

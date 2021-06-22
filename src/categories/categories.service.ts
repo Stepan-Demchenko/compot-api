@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -21,35 +21,41 @@ export class CategoriesService {
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto, user: User, file: MulterFile): Promise<void> {
-    try {
-      const idOfImage: number = await this.imageService.save(file);
-      const idOfCategory: InsertResult = await this.categoryRepository
-        .createQueryBuilder()
-        .insert()
-        .values({ ...createCategoryDto, createBy: user })
-        .returning('id')
-        .execute();
-      await this.categoryRepository
-        .createQueryBuilder()
-        .relation(Category, 'images')
-        .of(+idOfCategory.identifiers[0].id)
-        .add(idOfImage);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
+    if (file) {
+      try {
+        const idOfImage: number = await this.imageService.save(file);
+        const idOfCategory: InsertResult = await this.categoryRepository
+          .createQueryBuilder()
+          .insert()
+          .values({ ...createCategoryDto, createBy: user })
+          .returning('id')
+          .execute();
+        await this.categoryRepository
+          .createQueryBuilder()
+          .relation(Category, 'images')
+          .of(+idOfCategory.identifiers[0].id)
+          .add(idOfImage);
+      } catch (error) {
+        throw new InternalServerErrorException(error);
+      }
+    } else {
+      throw new HttpException('Image of category is required', HttpStatus.BAD_REQUEST);
     }
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Category[]>> {
-    const total: number = await this.categoryRepository.count();
-    const categories: Category[] = await this.categoryRepository
-      .createQueryBuilder()
-      .select()
-      .from(Category, 'category')
-      .skip(paginationQuery.offset || 0)
-      .take(paginationQuery.limit || 10)
-      .getMany();
-
-    return ResponseFactory.success(categories, { total });
+    try {
+      const total: number = await this.categoryRepository.count();
+      const categories: Category[] = await this.categoryRepository
+        .createQueryBuilder('category')
+        .leftJoinAndSelect('category.images', 'image')
+        .skip(paginationQuery.offset || 0)
+        .take(paginationQuery.limit || 10)
+        .getMany();
+      return ResponseFactory.success(categories, { total });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async findOne(id: number): Promise<HttpResponse<Category>> {
