@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -36,7 +36,7 @@ export class CategoriesService {
           .of(+idOfCategory.identifiers[0].id)
           .add(idOfImage);
       } catch (error) {
-        throw new InternalServerErrorException(error);
+        throw new HttpException(error, HttpStatus.BAD_REQUEST);
       }
     } else {
       throw new HttpException('Image of category is required', HttpStatus.BAD_REQUEST);
@@ -54,17 +54,21 @@ export class CategoriesService {
         .getMany();
       return ResponseFactory.success(categories, { total });
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
   async findOne(id: number): Promise<HttpResponse<Category>> {
-    const foundedCategory: Category = await this.categoryRepository
-      .createQueryBuilder('category')
-      .leftJoinAndSelect('category.images', 'image')
-      .where('category.id = :id', { id })
-      .getOneOrFail();
-    return ResponseFactory.success(foundedCategory);
+    try {
+      const foundedCategory: Category = await this.categoryRepository
+        .createQueryBuilder('category')
+        .leftJoinAndSelect('category.images', 'image')
+        .where('category.id = :id', { id })
+        .getOneOrFail();
+      return ResponseFactory.success(foundedCategory);
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto, file?: MulterFile): Promise<void> {

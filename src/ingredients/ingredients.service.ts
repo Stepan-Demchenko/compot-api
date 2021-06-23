@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -21,40 +21,52 @@ export class IngredientsService {
   ) {}
 
   async create(createIngredientDto: CreateIngredientDto, user: User, file: MulterFile): Promise<void> {
-    const idOfImage: number = await this.imageService.save(file);
-    const idOfIngredient: InsertResult = await this.ingredientRepository
-      .createQueryBuilder()
-      .insert()
-      .values({ ...createIngredientDto, createBy: user })
-      .returning('id')
-      .execute();
-    await this.ingredientRepository
-      .createQueryBuilder()
-      .relation(Ingredient, 'images')
-      .of(+idOfIngredient.identifiers[0].id)
-      .add(idOfImage);
+    try {
+      const idOfImage: number = await this.imageService.save(file);
+      const idOfIngredient: InsertResult = await this.ingredientRepository
+        .createQueryBuilder()
+        .insert()
+        .values({ ...createIngredientDto, createBy: user })
+        .returning('id')
+        .execute();
+      await this.ingredientRepository
+        .createQueryBuilder()
+        .relation(Ingredient, 'images')
+        .of(+idOfIngredient.identifiers[0].id)
+        .add(idOfImage);
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Ingredient[]>> {
-    const total: number = await this.ingredientRepository.count();
-    const items: Ingredient[] = await this.ingredientRepository
-      .createQueryBuilder()
-      .select()
-      .from(Ingredient, 'ingredient')
-      .skip(paginationQuery.offset || 0)
-      .take(paginationQuery.limit || 10)
-      .getMany();
+    try {
+      const total: number = await this.ingredientRepository.count();
+      const items: Ingredient[] = await this.ingredientRepository
+        .createQueryBuilder()
+        .select()
+        .from(Ingredient, 'ingredient')
+        .skip(paginationQuery.offset || 0)
+        .take(paginationQuery.limit || 10)
+        .getMany();
 
-    return ResponseFactory.success(items, { total });
+      return ResponseFactory.success(items, { total });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findOne(id: number): Promise<HttpResponse<Ingredient>> {
-    const foundedIngredient: Ingredient = await this.ingredientRepository
-      .createQueryBuilder('ingredient')
-      .leftJoinAndSelect('ingredient.images', 'images')
-      .where('ingredient.id = :id', { id })
-      .getOneOrFail();
-    return ResponseFactory.success(foundedIngredient);
+    try {
+      const foundedIngredient: Ingredient = await this.ingredientRepository
+        .createQueryBuilder('ingredient')
+        .leftJoinAndSelect('ingredient.images', 'images')
+        .where('ingredient.id = :id', { id })
+        .getOneOrFail();
+      return ResponseFactory.success(foundedIngredient);
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(id: number, updateIngredientDto: UpdateIngredientDto, file: MulterFile): Promise<void> {
@@ -79,13 +91,15 @@ export class IngredientsService {
 
   async remove(id: number): Promise<void> {
     const foundedIngredient: HttpResponse<Ingredient> = await this.findOne(id);
-    if (foundedIngredient.data.id) {
+    try {
       foundedIngredient.data.images.map(async (image: Image) => await this.imageService.delete(image));
       await this.ingredientRepository
         .createQueryBuilder()
         .delete()
         .where('id=:id', { id: foundedIngredient.data.id })
         .execute();
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }
   }
 }
