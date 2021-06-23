@@ -1,25 +1,28 @@
-import { IsNumber, IsString } from 'class-validator';
-import { Category } from '../../categories/entities/category.entity';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
+import { Type } from 'class-transformer';
+import { Ingredient } from '../../ingredients/entities/ingredient.entity';
 
 export class CreateFoodDto {
   @IsString()
   readonly title: string;
 
+  @Type(() => Number)
   @IsNumber({ allowInfinity: true, maxDecimalPlaces: 2 })
-  readonly price: number;
+  price: number;
 
+  @Type(() => Number)
   @IsNumber({ allowInfinity: true, maxDecimalPlaces: 2 })
-  readonly weight: number;
+  weight: number;
 
   @IsString()
-  readonly description: string;
+  description: string;
 
-  @IsNumber({ allowNaN: false, allowInfinity: false }, { each: true })
-  ingredients: any[];
+  @IsArray()
+  ingredients: Ingredient[];
 
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  category: Category;
+  // @IsNumber({ allowNaN: false, allowInfinity: false })
+  // category: Category;
 
   createBy: User;
 }

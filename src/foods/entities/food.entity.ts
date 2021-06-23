@@ -1,15 +1,10 @@
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  RelationId,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm';
+
+import { Image } from '../../common/entities/image';
 import { BaseEntity } from '../../common/base.entity';
+import { User } from '../../users/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Ingredient } from '../../ingredients/entities/ingredient.entity';
-import { User } from '../../users/entities/user.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
@@ -22,8 +17,12 @@ export class Food extends BaseEntity {
   @Column({ type: 'real' })
   weight: number;
 
-  @Column()
-  imgSrc: string;
+  @ManyToMany(() => Image, (image: Image) => image.foods)
+  @JoinTable()
+  images: Image[];
+
+  @RelationId((food: Food) => food.images)
+  imageIds: number[];
 
   @Column({ type: 'character', length: 500, nullable: true })
   description: string;
