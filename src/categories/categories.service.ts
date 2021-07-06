@@ -95,11 +95,15 @@ export class CategoriesService {
     const foundedCategory: HttpResponse<Category> = await this.findOne(id);
     if (foundedCategory.data.id) {
       foundedCategory.data.images.map(async (image: Image) => await this.imageService.delete(image));
-      await this.categoryRepository
-        .createQueryBuilder()
-        .delete()
-        .where('id = :id', { id: foundedCategory.data.id })
-        .execute();
+      try {
+        await this.categoryRepository
+          .createQueryBuilder()
+          .delete()
+          .where('id = :id', { id: foundedCategory.data.id })
+          .execute();
+      } catch (e) {
+        throw new HttpException(e, HttpStatus.BAD_REQUEST);
+      }
     }
   }
 }

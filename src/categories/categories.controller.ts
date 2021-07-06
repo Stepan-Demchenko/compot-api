@@ -12,6 +12,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -36,7 +37,7 @@ export class CategoriesController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('images'))
   create(
-    @Body() createCategoryDto: CreateCategoryDto,
+    @Body(new ValidationPipe()) createCategoryDto: CreateCategoryDto,
     @GetUser() user: User,
     @UploadedFile() file: MulterFile,
   ): Promise<void> {
@@ -59,7 +60,7 @@ export class CategoriesController {
   @UseInterceptors(FileInterceptor('images'))
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body(new ValidationPipe()) updateCategoryDto: UpdateCategoryDto,
     @UploadedFile() file: MulterFile,
   ): Promise<void> {
     return this.categoriesService.update(id, updateCategoryDto, file);

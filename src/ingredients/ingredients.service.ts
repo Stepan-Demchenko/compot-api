@@ -72,13 +72,17 @@ export class IngredientsService {
   async update(id: number, updateIngredientDto: UpdateIngredientDto, file: MulterFile): Promise<void> {
     const foundIngredient: HttpResponse<Ingredient> = await this.findOne(id);
     if (file) {
-      foundIngredient.data.images.map(async (image: Image) => await this.imageService.update(file, image));
-      await this.ingredientRepository
-        .createQueryBuilder()
-        .update(Ingredient)
-        .set({ ...updateIngredientDto })
-        .where('id=:id', { id })
-        .execute();
+      try {
+        foundIngredient.data.images.map(async (image: Image) => await this.imageService.update(file, image));
+        await this.ingredientRepository
+          .createQueryBuilder()
+          .update(Ingredient)
+          .set({ ...updateIngredientDto })
+          .where('id=:id', { id })
+          .execute();
+      } catch (e) {
+        throw new HttpException(e, HttpStatus.BAD_REQUEST);
+      }
     } else {
       await this.ingredientRepository
         .createQueryBuilder()

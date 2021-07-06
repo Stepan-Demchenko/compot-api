@@ -5,6 +5,7 @@ import { BaseEntity } from '../../common/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Ingredient } from '../../ingredients/entities/ingredient.entity';
+import { Order } from '../../orders/entities/order.entity';
 
 @Entity() //sql table === 'food'
 export class Food extends BaseEntity {
@@ -49,4 +50,7 @@ export class Food extends BaseEntity {
 
   @ManyToOne(() => User, (user: User) => user.foods)
   createBy: User;
+
+  @ManyToMany(() => Order, (order: Order) => order.foods)
+  orders: Order[];
 }
