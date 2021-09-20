@@ -26,6 +26,7 @@ export class UsersService {
       if (error.code === '23505') {
         throw new HttpException(`User with ${createUserDto.email} email is already exist`, HttpStatus.FORBIDDEN);
       }
+      throw new HttpException(error.code, HttpStatus.FORBIDDEN);
     }
   }
 
