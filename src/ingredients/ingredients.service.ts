@@ -21,22 +21,22 @@ export class IngredientsService {
   ) {}
 
   async create(createIngredientDto: CreateIngredientDto, user: User, file: MulterFile): Promise<void> {
-    try {
-      const idOfImage: number = await this.imageService.save(file);
-      const idOfIngredient: InsertResult = await this.ingredientRepository
-        .createQueryBuilder()
-        .insert()
-        .values({ ...createIngredientDto, createBy: user })
-        .returning('id')
-        .execute();
-      await this.ingredientRepository
-        .createQueryBuilder()
-        .relation(Ingredient, 'images')
-        .of(+idOfIngredient.identifiers[0].id)
-        .add(idOfImage);
-    } catch (e) {
-      throw new HttpException(e, HttpStatus.BAD_REQUEST);
-    }
+    // try {
+    //   const idOfImage: number = await this.imageService.save(file);
+    //   const idOfIngredient: InsertResult = await this.ingredientRepository
+    //     .createQueryBuilder()
+    //     .insert()
+    //     .values({ ...createIngredientDto, createBy: user })
+    //     .returning('id')
+    //     .execute();
+    //   await this.ingredientRepository
+    //     .createQueryBuilder()
+    //     .relation(Ingredient, 'images')
+    //     .of(+idOfIngredient.identifiers[0].id)
+    //     .add(idOfImage);
+    // } catch (e) {
+    //   throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    // }
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<HttpResponse<Ingredient[]>> {

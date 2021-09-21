@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { InsertResult, Repository } from 'typeorm';
+import { EntityManager, InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
@@ -9,17 +9,18 @@ import { MulterFile } from '../../interfaces/multer-file.interface';
 @Injectable()
 export class ImageService {
   constructor(@InjectRepository(Image) private readonly imageRepository: Repository<Image>) {}
-  async save(file: MulterFile): Promise<number> {
+  async save(manager: EntityManager, file: MulterFile): Promise<number> {
     try {
-      const result: InsertResult = await this.imageRepository
+      const result: InsertResult = await manager
         .createQueryBuilder()
         .insert()
+        .into(Image)
         .values({ originalName: file.originalname, src: file.path })
         .returning('*')
         .execute();
       return +result.identifiers[0].id;
     } catch (e) {
-      fs.unlink(file.path, () => {
+      fs.unlink(file.pat h, () => {
         throw new HttpException(`We can't save image, something went wrong! ${e}`, HttpStatus.NOT_MODIFIED);
       });
     }
