@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InsertResult, Repository } from 'typeorm';
+import { Connection, InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Image } from '../common/entities/image';
@@ -18,28 +18,32 @@ export class CategoriesService {
   constructor(
     @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
     private readonly imageService: ImageService,
+    private readonly connection: Connection,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto, user: User, file: MulterFile): Promise<void> {
-    if (file) {
-      try {
-        const idOfImage: number = await this.imageService.save(file);
-        const idOfCategory: InsertResult = await this.categoryRepository
-          .createQueryBuilder()
-          .insert()
-          .values({ ...createCategoryDto, createBy: user })
-          .returning('id')
-          .execute();
-        await this.categoryRepository
-          .createQueryBuilder()
-          .relation(Category, 'images')
-          .of(+idOfCategory.identifiers[0].id)
-          .add(idOfImage);
-      } catch (error) {
-        throw new HttpException(error, HttpStatus.BAD_REQUEST);
-      }
-    } else {
-      throw new HttpException('Image of category is required', HttpStatus.BAD_REQUEST);
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const idOfImage: number = await this.imageService.save(queryRunner.manager, file);
+      const idOfCategory: InsertResult = await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Category)
+        .values({ ...createCategoryDto, createBy: user })
+        .returning('id')
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .relation(Category, 'images')
+        .of(+idOfCategory.identifiers[0].id)
+        .add(idOfImage);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -57,7 +61,7 @@ export class CategoriesService {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
-
+  0;
   async findOne(id: number): Promise<HttpResponse<Category>> {
     try {
       const foundedCategory: Category = await this.categoryRepository

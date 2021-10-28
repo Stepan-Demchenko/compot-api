@@ -50,7 +50,7 @@ export class FoodsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const idOfImage: number = await this.imageService.save(file);
+      const idOfImage: number = await this.imageService.save(queryRunner.manager, file);
       const idOfFood: InsertResult = await queryRunner.manager
         .createQueryBuilder()
         .insert()

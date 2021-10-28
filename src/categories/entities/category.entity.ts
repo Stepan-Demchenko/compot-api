@@ -28,7 +28,7 @@ export class Category extends BaseEntity {
   @ManyToOne(() => User, (user: User) => user.categories, { eager: false })
   createBy: User;
 
-  @ManyToMany((type) => Image, (image: Image) => image.categories, { cascade: true })
+  @ManyToMany((type) => Image, (image: Image) => image.categories, { cascade: true, nullable: false })
   @JoinTable()
   images: Image[];
 
