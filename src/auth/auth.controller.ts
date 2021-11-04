@@ -1,5 +1,4 @@
-import { AuthGuard } from '@nestjs/passport';
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
@@ -18,10 +17,4 @@ export class AuthController {
   login(@Body() loginDto: LoginDto): Promise<{ accessToken: string }> {
     return this.authService.logIn(loginDto);
   }
-
-  // @Get()
-  // @UseGuards(AuthGuard())
-  // test() {
-  //   return 'ewdew';
-  // }
 }
