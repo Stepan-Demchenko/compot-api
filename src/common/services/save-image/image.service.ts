@@ -20,7 +20,7 @@ export class ImageService {
         .execute();
       return +result.identifiers[0].id;
     } catch (e) {
-      fs.unlink(file.pat h, () => {
+      fs.unlink(file.path, () => {
         throw new HttpException(`We can't save image, something went wrong! ${e}`, HttpStatus.NOT_MODIFIED);
       });
     }
