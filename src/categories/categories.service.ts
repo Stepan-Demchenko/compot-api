@@ -61,7 +61,7 @@ export class CategoriesService {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
-  0;
+
   async findOne(id: number): Promise<HttpResponse<Category>> {
     try {
       const foundedCategory: Category = await this.categoryRepository

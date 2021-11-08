@@ -15,6 +15,12 @@ import { IngredientsModule } from './ingredients/ingredients.module';
   imports: [
     ConfigModule.forRoot({
       load: [appConfig],
+      validationSchema: {
+        AWS_REGION: process.env.AWS_REGION,
+        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+        AWS_PUBLIC_BUCKET_NAME: process.env.AWS_PUBLIC_BUCKET_NAME_DEV,
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
