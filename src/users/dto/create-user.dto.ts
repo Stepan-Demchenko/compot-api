@@ -1,11 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 import { UserRole } from '../../common/enums/user-role.enum';
 
@@ -31,5 +24,6 @@ export class CreateUserDto {
   salt: string;
 
   @IsEnum(UserRole)
+  @IsOptional()
   role: UserRole;
 }

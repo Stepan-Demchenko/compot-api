@@ -1,16 +1,18 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  signUp(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signUp(createUserDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  signUp(@Body() createUserDto: CreateUserDto, @UploadedFile() avatar: Express.Multer.File) {
+    return this.authService.signUp(createUserDto, avatar);
   }
 
   @Post('login')

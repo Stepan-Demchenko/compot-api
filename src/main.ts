@@ -16,11 +16,12 @@ async function bootstrap() {
   config.update({
     accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
     secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY'),
-    region: configService.get('AWS_REGION'),
+    region: configService.get('AWS_PUBLIC_BUCKET_NAME_DEV'),
   });
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter(), new TypeOrmExceptionFilter());
   await app.listen(3000);
   app.use(csurf());
 }
+
 bootstrap();

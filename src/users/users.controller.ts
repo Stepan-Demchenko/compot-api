@@ -1,9 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '../common/enums/user-role.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 @Auth(UserRole.Admin, UserRole.Moderator)
@@ -12,8 +26,9 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createUserDto: CreateUserDto): Promise<void> {
-    await this.usersService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  async create(@Body() createUserDto: CreateUserDto, @UploadedFile() avatar: Express.Multer.File): Promise<void> {
+    await this.usersService.create(createUserDto, avatar);
   }
 
   @Get()

@@ -3,7 +3,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -13,6 +15,7 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { Food } from '../../foods/entities/food.entity';
 import { Ingredient } from '../../ingredients/entities/ingredient.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { File } from '../../common/entities/file';
 
 @Entity()
 @Unique(['email'])
@@ -32,8 +35,12 @@ export class User {
   @Column({ nullable: true })
   fullName: string;
 
-  @Column({ nullable: true })
-  avatar: string;
+  @JoinColumn()
+  @OneToOne(() => File, {
+    eager: true,
+    nullable: true,
+  })
+  public avatar?: File;
 
   @Column({ select: false })
   password: string;
@@ -59,10 +66,7 @@ export class User {
   @OneToMany((type) => Category, (category: Category) => category.createBy)
   categories: Category[];
 
-  @OneToMany(
-    (type) => Ingredient,
-    (ingredient: Ingredient) => ingredient.createBy,
-  )
+  @OneToMany((type) => Ingredient, (ingredient: Ingredient) => ingredient.createBy)
   ingredients: Ingredient[];
 
   @AfterLoad()

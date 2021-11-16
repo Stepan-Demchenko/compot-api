@@ -26,7 +26,7 @@ export class CategoriesService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const idOfImage: number = await this.imageService.save(queryRunner.manager, file);
+      const idOfImage: InsertResult = await this.imageService.save(queryRunner.manager, file);
       const idOfCategory: InsertResult = await queryRunner.manager
         .createQueryBuilder()
         .insert()

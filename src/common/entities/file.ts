@@ -1,13 +1,13 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class AwsPublicFile {
+export class File {
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
   @Column()
-  public url: string;
+  url: string;
 
   @Column()
-  public key: string;
+  key: string;
 }
